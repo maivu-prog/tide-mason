@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Tide Mason — Thợ Đắp Triều</title>
+<title>Tide Mason</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --sand:#E8C77E; --earth:#B9793F; --rock:#8B5A2B;
@@ -303,18 +306,208 @@
     /* khung ban co can cao hon be ngang mot chut de con 1fr do vao cot phai */
     #app>*{min-height:0}
   }
+
+  /* ================= UI 05/11 — "nhin phai ra hon" =================
+     Nen sang/am (troi → cat), 1 mau nhan cam san ho cho nut TIDE UP, chu >=16px,
+     so quan trong >=24px, nut >=48px co bong + trang thai nhan. Ghi de cac luat cu. */
+  :root{ --sky:#c4ecf7; --sandbg:#fff2d6; --accent:#ff7a45; --accent2:#e0522a; --panel:#fffaf0; }
+  html,body{background:linear-gradient(180deg,var(--sky) 0%,#e3f6f4 45%,var(--sandbg) 100%);
+    font-family:"Fredoka","Baloo 2","Trebuchet MS",system-ui,sans-serif;font-size:16px}
+  button{font-family:inherit}
+
+  /* --- dai tren: HUD + muc tieu lien mot khoi --- */
+  #hud{background:var(--panel);border-bottom:none;padding:6px 8px 4px;gap:6px}
+  .pill{font-size:24px;padding:2px 10px;border-radius:14px;gap:6px;min-height:40px;
+    box-shadow:0 2px 0 rgba(43,30,20,.18);font-weight:700}
+  .pill small,.pill .lbl,#p-best .lbl{font-size:16px;opacity:.75;font-weight:500}
+  .pill img{width:24px;height:24px}
+  #waterbar{width:56px;height:12px;border-radius:6px}
+  #waterbar i{background:#3aa7c9}
+  #p-tower{display:none}                       /* mang thap hien o dai muc tieu, khong lap 2 cho */
+  #helpbtn{min-width:48px;min-height:44px;justify-content:center;background:#fff;cursor:pointer}
+  #helpbtn:active{transform:translateY(2px);box-shadow:none}
+  #goalbar{background:var(--panel);border-bottom:3px solid var(--ink);font-size:16px;
+    padding:2px 10px 7px;gap:4px 16px;box-shadow:0 4px 10px rgba(43,30,20,.10)}
+  #goalbar b{font-size:22px}
+  #goalprog{width:120px;height:14px;border-radius:7px}
+  #goalbar .bad{color:var(--warn)}
+  #goalbar .warnrow{font-size:16px}
+  #goalbar .warnrow b{font-size:18px}
+  body.easy #goalbar{background:#f1faef;color:#2f5b3a}
+
+  /* --- san choi: khong con khung xanh tham --- */
+  #boardwrap{background:transparent}
+  #board{filter:drop-shadow(0 8px 14px rgba(30,80,100,.25));border-radius:18px}
+  #toast{font-size:16px;padding:8px 16px;background:rgba(43,30,20,.9)}
+
+  /* --- chi dan + dan tay --- */
+  #hintbar{font-size:16px;min-height:44px;padding:7px 12px;background:#fff3c9;border-top:3px solid var(--ink)}
+  #hintbar img{width:22px;height:22px}
+  #hintbar b{color:#b8431b}
+  #tutbar{font-size:16px;background:#2f7a5c;padding:8px 12px}
+  #tutbar .no{font-size:15px}
+  #tutbar .skip{font-size:15px;min-height:40px;padding:4px 12px;border-color:rgba(255,255,255,.75)}
+
+  /* --- hang la + nut --- */
+  #tray{background:var(--panel);padding:8px 8px 10px;gap:8px}
+  .card{border-radius:14px;min-height:88px;padding:6px 4px 5px;gap:3px;
+    box-shadow:0 3px 0 rgba(43,30,20,.22)}
+  .card img{width:40px;height:40px}
+  .card .cn{font-size:16px;font-weight:700;line-height:1.1}
+  .card .cd{font-size:15px;opacity:.85;line-height:1.15}
+  .card.sel{box-shadow:0 0 0 4px #ffc93c,0 6px 0 rgba(43,30,20,.22);background:#fff7d6}
+  .card.used{opacity:.35;box-shadow:none;filter:grayscale(.6)}
+  .card:active{transform:translateY(2px)}
+  #acts{width:118px;gap:7px}
+  #tidebtn{min-height:58px;border-radius:14px;font-size:20px;
+    background:linear-gradient(#ff9566,var(--accent2));box-shadow:0 4px 0 #8a3417;margin-bottom:4px}
+  #tidebtn small{font-size:14px;font-weight:500;opacity:.95}
+  #tidebtn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a3417}
+  #tidebtn.big{background:linear-gradient(#e85b4a,#b72f22);box-shadow:0 4px 0 #6d1b12}
+  #undobtn{min-height:48px;border-radius:14px;font-size:16px;background:#fff;box-shadow:0 3px 0 rgba(43,30,20,.25)}
+  #undobtn .uw{font-size:20px}
+  #undobtn:active{transform:translateY(2px);box-shadow:none}
+
+  /* --- phieu (cho, man chao, man ket) --- */
+  .ov{background:rgba(70,45,20,.42)}
+  .panel{background:var(--panel);border-radius:20px;padding:16px;box-shadow:0 10px 30px rgba(43,30,20,.3)}
+  .panel h2{font-size:26px}
+  .panel p.sub{font-size:16px;opacity:.85}
+  .shopcard{border-radius:14px;box-shadow:0 3px 0 rgba(43,30,20,.22);padding:8px 4px}
+  .shopcard img{width:50px;height:50px}
+  .shopcard .cn{font-size:16px}
+  .shopcard .cd{font-size:15px;opacity:.85;min-height:36px}
+  .shopcard .pr{font-size:18px}
+  .shopcard .pr img{width:18px;height:18px}
+  .btn{min-height:52px;font-size:18px;border-radius:14px;box-shadow:0 4px 0 rgba(43,30,20,.35);
+    background:var(--accent2)}
+  .btn.alt{background:#2e86a8}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(43,30,20,.35)}
+  #introEasy{font-size:16px}
+  .goalbox,.introflow{font-size:16px}
+  .icard .cn,#rescueBox .rh{font-size:16px}
+  .icard .cd,#rescueBox .rsub,#rescueCards .rc .d,#rescueBox .rnote{font-size:15px;opacity:.9}
+  #rescueCards .rc .n{font-size:15px}
+  .panelfoot{background:var(--panel)}
+  .panelfoot .morehint{font-size:16px}
+  #scorelist{font-size:16px;max-width:320px}
+  #scorelist div.tot{font-size:24px}
+  #bestline{font-size:16px}
+  #diary{font-size:15px;max-width:340px}
+  #stars{font-size:30px}
+
+  @media (max-width:420px){
+    .pill{font-size:22px;padding:2px 7px;gap:4px}
+    .pill small{display:none}
+    #waterbar{display:none}
+    .card img{width:34px;height:34px}
+    .card .cn{font-size:15px}
+    #acts{width:104px}
+    #tidebtn{font-size:18px}
+    #undobtn{font-size:15px}
+    #goalbar{font-size:15px;gap:2px 12px}
+    #goalbar b{font-size:20px}
+    #goalprog{width:84px}
+  }
+
+  /* --- MAY TINH / man ngang rong: ban co ben trai cao het man, cot dieu khien ben phai --- */
+  @media (orientation:landscape) and (min-width:900px) and (min-height:521px){
+    #app{display:grid;grid-template-columns:1fr 400px;
+      grid-template-rows:auto auto auto auto 1fr;
+      grid-template-areas:"board hud" "board goal" "board tut" "board hint" "board tray";
+      background:transparent}
+    #app>*{min-height:0}
+    #boardwrap{grid-area:board;min-width:0;padding:12px}
+    #hud{grid-area:hud;flex-wrap:wrap;overflow:visible;border-left:3px solid var(--ink)}
+    #goalbar{grid-area:goal;justify-content:flex-start;border-left:3px solid var(--ink);
+      flex-direction:column;align-items:flex-start;gap:6px;padding:6px 14px 12px}
+    #tutbar{grid-area:tut;border-left:3px solid var(--ink)}
+    #hintbar{grid-area:hint;border-left:3px solid var(--ink);border-bottom:3px solid var(--ink)}
+    #tray{grid-area:tray;flex-direction:column;border-top:none;border-left:3px solid var(--ink);
+      padding:12px;justify-content:space-between}
+    #hand{flex-wrap:wrap;gap:10px}
+    .card{flex:1 1 calc(50% - 10px);max-width:none;min-height:96px}
+    .card img{width:44px;height:44px}
+    #acts{width:100%;flex-direction:row;gap:10px}
+    #undobtn{width:120px;flex:0 0 auto;min-height:60px}
+    #tidebtn{flex:1 1 auto;min-height:60px;font-size:22px}
+    #goalprog{width:200px}
+  }
+
+  /* DIEN THOAI CAM NGANG (cao <=520px): cot phai chi 232-300px va 360-390px cao —
+     thu gon lai cho vua, khong thi nut ↶ / TIDE UP troi khoi man (uitest nhom J). */
+  @media (orientation:landscape) and (max-height:520px) and (min-width:560px){
+    #hud{padding:4px 6px 2px;gap:4px}
+    .pill{font-size:18px;min-height:34px;padding:1px 7px}
+    .pill small,#waterbar{display:none}
+    .pill img{width:20px;height:20px}
+    #helpbtn{min-height:34px;min-width:44px}
+    #helpbtn .lbl{display:none}
+    #goalbar{font-size:14px;padding:2px 8px 4px;gap:2px 10px}
+    #goalbar b{font-size:16px}
+    #goalprog{width:70px;height:11px}
+    #hintbar{font-size:14px;min-height:34px;padding:4px 8px}
+    #tutbar{font-size:14px;padding:5px 8px}
+    #tray{padding:6px 8px;gap:6px}
+    .card{min-height:60px;padding:3px 2px}
+    .card img{width:28px;height:28px}
+    .card .cn{font-size:14px}
+    .card .cd{display:none}
+    #undobtn{min-height:46px;font-size:14px;flex-direction:row;gap:4px}
+    #undobtn .uw{font-size:16px}
+    #tidebtn{min-height:46px;font-size:17px;margin-bottom:0}
+    #tidebtn small{font-size:12px}
+  }
+
+  /* DIEN THOAI NHO (320-380px rong hoac <=680px cao): chu to 16px lam bang luat ? chi doc
+     duoc 17-23% mot man, va thanh canh bao + dan tay bop ban co con 49px. Thu gon lai. */
+  @media (max-width:380px), (max-height:680px) and (orientation:portrait){
+    .panel{padding:11px}
+    .panel h2{font-size:21px}
+    .panel p.sub{font-size:14px;margin-bottom:6px}
+    .goalbox,.introflow{font-size:14px;line-height:1.35;padding:6px 8px}
+    .icard .cn,#rescueBox .rh{font-size:14px}
+    .icard .cd,#rescueBox .rsub,#rescueCards .rc .d,#rescueBox .rnote{font-size:13px}
+    .icard img{width:34px;height:34px}
+    .panelfoot{margin:8px -11px -11px;padding:7px 9px 9px;gap:6px}
+    .panelfoot .btn{min-height:44px;font-size:15px;padding:6px 10px}
+    .panelfoot .morehint{font-size:14px;padding:3px 8px}
+    #hintbar{font-size:14px;min-height:36px;padding:5px 8px}
+    #tutbar{font-size:14px;padding:5px 8px}
+    #tutbar .skip{min-height:34px;font-size:13px}
+    #goalbar{font-size:14px;padding:1px 8px 4px}
+    #goalbar b{font-size:17px}
+    #goalbar .warnrow,#goalbar .warnrow b{font-size:14px}
+    .pill{font-size:19px;min-height:36px}
+    #helpbtn{min-height:36px}
+    .card{min-height:70px}
+    .card .cn{font-size:14px}
+    #tidebtn{min-height:50px;font-size:16px}
+    #undobtn{min-height:44px;font-size:14px}
+  }
+
+  @media (max-width:340px){
+    .panel h2{font-size:19px}
+    .panel p.sub{font-size:13px}
+    .goalbox,.introflow{font-size:13px;line-height:1.3}
+    .icard .cd,#rescueBox .rsub,#rescueCards .rc .d,#rescueBox .rnote{font-size:12px}
+    .panelfoot .btn{min-height:42px;font-size:14px;padding:5px 8px}
+    .panelfoot{gap:4px;padding:5px 8px 7px}
+    .panelfoot .morehint{font-size:13px;padding:2px 6px;line-height:1.15}
+    .ov{padding:6px}
+  }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="hud">
-    <div class="pill" id="p-tide"><span id="tideTxt">Triều 1/15</span></div>
-    <div class="pill" id="p-water"><small>Nước</small><span id="waterTxt">0</span>
+    <div class="pill" id="p-tide">🌊<small>Tide</small><span id="tideTxt">1/15</span></div>
+    <div class="pill" id="p-water">💧<small>Water</small><span id="waterTxt">0</span>
       <div id="waterbar"><i></i></div></div>
-    <div class="pill" id="p-shell"><img id="icoShell" alt=""><span id="shellTxt">0</span></div>
-    <div class="pill" id="p-tower"><small>Tháp</small><span id="towerTxt">●●●</span></div>
-    <div class="pill" id="p-best"><span class="lbl">Kỷ lục</span><span id="bestTxt">—</span></div>
-    <button class="pill" id="helpbtn" title="Cách chơi">?<span class="lbl"> Cách chơi</span></button>
+    <div class="pill" id="p-shell" title="Shells to spend"><img id="icoShell" alt=""><small>Shells</small><span id="shellTxt">0</span></div>
+    <div class="pill" id="p-tower"><small>Tower</small><span id="towerTxt">●●●</span></div>
+    <div class="pill" id="p-best"><span class="lbl">Best</span><span id="bestTxt">—</span></div>
+    <button class="pill" id="helpbtn" title="How to play">?<span class="lbl"> How to play</span></button>
   </div>
 
   <div id="goalbar"></div>
@@ -322,19 +515,19 @@
   <div id="boardwrap">
     <canvas id="board"></canvas>
     <div id="toast"></div>
-    <div id="bigtide"><span>🌊 ĐẠI TRIỀU</span></div>
+    <div id="bigtide"><span>🌊 SPRING TIDE</span></div>
 
     <div class="ov" id="ovMarket"><div class="panel">
-      <h2>Chợ Vỏ Sò</h2><p class="sub" id="shopSub">Mua ở Chợ không trừ Sò kiếm được — lá mua về vào bộ</p>
+      <h2>Shell Market</h2><p class="sub" id="shopSub">Spending here does not lower Shells earned</p>
       <div id="shoprow"></div>
       <div class="panelfoot">
-        <button class="btn alt" id="skipBtn">Xong, TRIỀU TỚI ▶</button>
+        <button class="btn alt" id="skipBtn">Done, NEXT TIDE ▶</button>
       </div>
     </div></div>
 
     <div class="ov" id="ovIntro"><div class="panel">
-      <h2 id="introH2">Tide Mason — Thợ Đắp Triều</h2>
-      <p class="sub" id="introSub">Giữ một đường bờ: Nhà ở chỗ khô, Cối ở ô ngập cạnh Nhà.</p>
+      <h2 id="introH2">Tide Mason</h2>
+      <p class="sub" id="introSub">Hold a shoreline: Houses on dry land, Mills in flooded tiles next to them.</p>
       <div id="introTwoCol">
         <div class="icol">
           <div class="goalbox" id="introGoal"></div>
@@ -342,29 +535,29 @@
         </div>
         <div class="icol">
           <div id="introCards"></div>
-          <div id="rescueBox"><div class="rh">🛟 Cứu công trình sắp ngập</div>
-            <div class="rsub">Ô có <b>viền gạch xanh + số ▼</b> là triều tới ngập. <b>Nhà</b> dính nước là mất (và Cối quanh đó mất người vận hành):</div>
+          <div id="rescueBox"><div class="rh">🛟 Save a building about to flood</div>
+            <div class="rsub">A tile with a <b>blue hatched border + ▼ number</b> floods next tide. A wet <b>House</b> is lost (and nearby Mills lose their crew):</div>
             <div id="rescueCards"></div>
             <div class="rnote" id="rescueNote"></div></div>
         </div>
       </div>
       <div class="panelfoot">
-        <button class="btn" id="introStart">CHƠI CÓ HƯỚNG DẪN ▶</button>
-        <button class="btn alt" id="introSkip">Vào chơi luôn</button>
-        <button class="btn alt" id="introEasy">🎓 Chơi lại VÁN TẬP</button>
+        <button class="btn" id="introStart">PLAY WITH GUIDE ▶</button>
+        <button class="btn alt" id="introSkip">Just play</button>
+        <button class="btn alt" id="introEasy">🎓 Replay PRACTICE ROUND</button>
       </div>
     </div></div>
 
     <div class="ov" id="ovEnd"><div class="panel">
-      <h2 id="endTitle">Hết triều</h2><p class="sub" id="endSub"></p>
+      <h2 id="endTitle">Out of tides</h2><p class="sub" id="endSub"></p>
       <canvas id="endmap" width="190" height="190"></canvas>
       <div id="stars"></div>
       <div id="scorelist"></div>
       <div id="bestline"></div>
       <div id="diary"></div>
       <div class="panelfoot">
-        <button class="btn" id="fullBtn">CHƠI BẢN ĐẦY ĐỦ ▶</button>
-        <button class="btn alt" id="againBtn">Chơi lại</button>
+        <button class="btn" id="fullBtn">PLAY FULL GAME ▶</button>
+        <button class="btn alt" id="againBtn">Play again</button>
       </div>
     </div></div>
   </div>
@@ -372,13 +565,13 @@
   <div id="hintbar"><img id="icoHint" alt=""><span id="hintTxt"></span></div>
 
   <div id="tutbar"><span class="no" id="tutNo">1/6</span><span class="tx" id="tutTxt"></span>
-    <button class="skip" id="tutSkip">Bỏ qua</button></div>
+    <button class="skip" id="tutSkip">Skip</button></div>
 
   <div id="tray">
     <div id="hand"></div>
     <div id="acts">
-      <button id="undobtn" disabled><span class="uw">↶</span><span>Hoàn tác</span></button>
-      <button id="tidebtn"><span id="tideBtnTxt">TRIỀU LÊN ▲</span><small id="tideBtnSub">nước +1</small></button>
+      <button id="undobtn" disabled><span class="uw">↶</span><span>Undo</span></button>
+      <button id="tidebtn"><span id="tideBtnTxt">TIDE UP ▲</span><small id="tideBtnSub">water +1</small></button>
     </div>
   </div>
 </div>
@@ -504,16 +697,16 @@ const maxLevel=()=>levelOf(nTides());
 
 /* ---------- định nghĩa lá ---------- */
 const CARD = {
-  raise:  {n:'Đắp Đất',  d:'+1 cao',      ic:'card_icon_raise_earth',        price:4,  unlock:1, tg:1},
-  raise2: {n:'Đắp Đất Đôi',d:'+1 cao ×2 ô',ic:'card_icon_raise_earth_double', price:12, unlock:5, tg:2},
-  dig:    {n:'Đào Kênh', d:'−1 cao',      ic:'card_icon_dig_canal',          price:3,  unlock:1, tg:1},
-  deep:   {n:'Kênh Sâu', d:'−2 cao',      ic:'card_icon_deep_canal',         price:11, unlock:7, tg:1},
-  house:  {n:'Nhà',      d:'ô khô',       ic:'card_icon_house',              price:6,  unlock:1, tg:1},
-  mill:   {n:'Cối Nước', d:'ra tiền khi ngập',ic:'card_icon_watermill',      price:7,  unlock:1, tg:1},
-  mill2:  {n:'Cối Đôi',  d:'2 cối nước',  ic:'card_icon_watermill_double',   price:16, unlock:8, tg:2},
-  levee:  {n:'Đê',       d:'nước không qua',ic:'card_icon_levee',            price:5,  unlock:1, tg:1},
-  repair: {n:'Vá Đê',    d:'hồi bền MỌI Đê/Cống',ic:'card_icon_repair_levee',price:5,  unlock:3, tg:0},
-  gate:   {n:'Cống',     d:'bấm mở/đóng', ic:'card_icon_gate',               price:10, unlock:4, tg:1}
+  raise:  {n:'Raise Land', d:'+1 height',      ic:'card_icon_raise_earth',        price:4,  unlock:1, tg:1},
+  raise2: {n:'Double Raise',d:'+1 height ×2 tiles',ic:'card_icon_raise_earth_double', price:12, unlock:5, tg:2},
+  dig:    {n:'Dig Canal', d:'−1 height',      ic:'card_icon_dig_canal',          price:3,  unlock:1, tg:1},
+  deep:   {n:'Deep Canal', d:'−2 height',      ic:'card_icon_deep_canal',         price:11, unlock:7, tg:1},
+  house:  {n:'House',    d:'dry tile',       ic:'card_icon_house',              price:6,  unlock:1, tg:1},
+  mill:   {n:'Water Mill', d:'pays when flooded',ic:'card_icon_watermill',      price:7,  unlock:1, tg:1},
+  mill2:  {n:'Twin Mill', d:'2 water mills',  ic:'card_icon_watermill_double',   price:16, unlock:8, tg:2},
+  levee:  {n:'Dike',     d:'water can\'t pass',ic:'card_icon_levee',            price:5,  unlock:1, tg:1},
+  repair: {n:'Patch Dike', d:'repairs ALL Dikes/Sluices',ic:'card_icon_repair_levee',price:5,  unlock:3, tg:0},
+  gate:   {n:'Sluice',   d:'tap to open/close', ic:'card_icon_gate',               price:10, unlock:4, tg:1}
 };
 /* Luat moi bat phai quay duoc mot vung kho → De la la BAT BUOC, khong con la la
    "tuy chon phong thu". Bo khoi dau cu chi co 4 De trong 13 la: do 25 seed thi
@@ -529,18 +722,18 @@ const START_DECK = ['raise','raise','dig','dig','house','house','house','mill','
 const TUT = {
   on:false, i:0,
   steps:[
-    {txt:'Ô có bánh xe nước là <b>Cối Nước</b>: <b>ngập mới ra tiền</b>, <u>và</u> phải có <b>Nhà còn khô</b> ở gần (≤2 ô) lo người vận hành — ngay dưới nó đã có Nhà rồi. Bấm lá <b>Đào Kênh</b> ở dưới.',
-     card:'dig', nag:'Bấm lá <b>Đào Kênh</b> (cái xẻng) ở hàng lá dưới cùng.'},
-    {txt:'Bấm <b>ô Cối Nước</b> đang nháy — hạ ô đó thấp xuống để con triều tới với được. Nhà bên dưới vẫn cao nên vẫn khô: <b>đủ cả hai điều kiện</b>.',
-     tile:[1,3], nag:'Bấm đúng ô đang nháy vàng (ô Cối Nước).'},
-    {txt:'Giữa đảo là <b>Tháp Mẫu</b> — ngập 3 lần là thua. <b>Nước không bao giờ qua Đê</b>. Bấm lá <b>Đê</b>.',
-     card:'levee', nag:'Bấm lá <b>Đê</b> ở hàng lá dưới cùng.'},
-    {txt:'Đắp Đê vào <b>ô đang nháy</b> — 1 trong 4 ô sát Tháp Mẫu. Muốn sống qua <b>Đại Triều (triều '+BIGTIDE[0]+')</b> thì cả 4 ô này phải là Đê.',
-     tile:[4,3], nag:'Bấm đúng ô đang nháy vàng, sát dưới Tháp Mẫu.'},
-    {txt:'Đặt xong rồi. Bấm <b>TRIỀU LÊN ▲</b> — xem nước dâng tới đâu, Nhà nào khô, Cối nào chạy. Cối ngập mà <b>không có Nhà khô gần</b> thì hiện <b>viền đỏ “thiếu người”</b> và không ra tiền.',
-     btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b> màu xanh bên phải.'},
-    {txt:'Đây là <b>Chợ Vỏ Sò</b>. Mua ở đây <b>không trừ</b> thanh 🐚 <b>Sò kiếm được</b> trên đầu — cứ mua. Mua 1 lá (nên mua <b>Đê</b>) rồi bấm <b>Xong</b>.',
-     market:true, nag:'Mua một lá, hoặc bấm <b>Xong, TRIỀU TỚI ▶</b>.'}
+    {txt:'The tile with a water wheel is a <b>Water Mill</b>: it <b>only pays when flooded</b>, <u>and</u> it needs a <b>dry House</b> nearby (≤2 tiles) for crew — there is one just below it. Tap the <b>Dig Canal</b> card below.',
+     card:'dig', nag:'Tap the <b>Dig Canal</b> card (the shovel) in the bottom row.'},
+    {txt:'Tap the flashing <b>Water Mill tile</b> — lower it so the next tide can reach it. The House below stays high and dry: <b>both conditions met</b>.',
+     tile:[1,3], nag:'Tap the tile flashing yellow (the Water Mill).'},
+    {txt:'The middle of the island is the <b>Mother Tower</b> — flood it 3 times and you lose. <b>Water never passes a Dike</b>. Tap the <b>Dike</b> card.',
+     card:'levee', nag:'Tap the <b>Dike</b> card in the bottom row.'},
+    {txt:'Build the Dike on the <b>flashing tile</b> — one of the 4 tiles next to the Mother Tower. To survive the <b>Spring Tide (tide '+BIGTIDE[0]+')</b> all 4 should be Dikes.',
+     tile:[4,3], nag:'Tap the tile flashing yellow, just below the Mother Tower.'},
+    {txt:'Done. Tap <b>TIDE UP ▲</b> — watch where the water rises, which Houses stay dry, which Mills run. A flooded Mill with <b>no dry House nearby</b> shows a <b>red “no crew” border</b> and pays nothing.',
+     btn:'tidebtn', nag:'Tap the orange <b>TIDE UP ▲</b> button.'},
+    {txt:'This is the <b>Shell Market</b>. Buying here <b>does not lower</b> the 🐚 <b>Shells earned</b> bar at the top — go ahead. Buy 1 card (a <b>Dike</b> is a good pick), then tap <b>Done</b>.',
+     market:true, nag:'Buy a card, or tap <b>Done, NEXT TIDE ▶</b>.'}
   ],
   cur(){ return this.on ? this.steps[this.i] : null; }
 };
@@ -550,55 +743,55 @@ TUT.full = TUT.steps;              // giu lai de quay ve ban day du sau Van Tap
 /* Van Tap: moi trieu 1 bai hoc = 3 buoc (chon la → bam o → bam TRIEU LEN).
    Cau chu toi da 1 dong, khong thuat ngu. Trieu 6 khong co bai hoc: tu choi. */
 const EASY_LESSON=[
- [{txt:'Nước sẽ dâng suốt ván. Ô nào <b>cao</b> thì nước không tới. Bấm lá <b>Đắp Đất</b>.',
-   card:'raise', nag:'Bấm lá <b>Đắp Đất</b> ở hàng lá dưới cùng.'},
-  {txt:'Bấm <b>ô đang nháy vàng</b> — ô đó cao thêm 1 tầng.',
-   tile:[1,3], nag:'Bấm đúng ô đang nháy vàng.'},
-  {txt:'Xong rồi. Bấm <b>TRIỀU LÊN ▲</b> xem nước dâng tới đâu.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b> màu xanh bên phải.'}],
+ [{txt:'Water rises all game. <b>High</b> tiles stay out of reach. Tap the <b>Raise Land</b> card.',
+   card:'raise', nag:'Tap the <b>Raise Land</b> card in the bottom row.'},
+  {txt:'Tap the <b>tile flashing yellow</b> — it gets 1 level higher.',
+   tile:[1,3], nag:'Tap the tile flashing yellow.'},
+  {txt:'Done. Tap <b>TIDE UP ▲</b> to see how far the water rises.',
+   btn:'tidebtn', nag:'Tap the orange <b>TIDE UP ▲</b> button.'}],
 
- [{txt:'<b>Nhà</b> ra tiền mỗi triều, miễn là còn <b>khô</b>. Bấm lá <b>Nhà</b>.',
-   card:'house', nag:'Bấm lá <b>Nhà</b> ở hàng lá dưới cùng.'},
-  {txt:'Đặt Nhà vào <b>ô vừa đắp cao</b> đang nháy — chỗ đó nước không với tới.',
-   tile:[1,3], nag:'Bấm đúng ô đang nháy vàng.'},
-  {txt:'Bấm <b>TRIỀU LÊN ▲</b> — Nhà khô thì cuối triều ra Vỏ Sò.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b>.'}],
+ [{txt:'A <b>House</b> pays every tide as long as it stays <b>dry</b>. Tap the <b>House</b> card.',
+   card:'house', nag:'Tap the <b>House</b> card in the bottom row.'},
+  {txt:'Put the House on the flashing <b>tile you just raised</b> — the water can\'t reach it.',
+   tile:[1,3], nag:'Tap the tile flashing yellow.'},
+  {txt:'Tap <b>TIDE UP ▲</b> — a dry House earns Shells at the end of the tide.',
+   btn:'tidebtn', nag:'Tap the <b>TIDE UP ▲</b> button.'}],
 
- [{txt:'Ngược lại, <b>Đào Kênh</b> hạ ô xuống thấp để <b>dẫn nước vào</b>. Bấm lá Đào Kênh.',
-   card:'dig', nag:'Bấm lá <b>Đào Kênh</b> (cái xẻng) ở hàng lá dưới.'},
-  {txt:'Đào <b>ô đang nháy</b> — ô ngay <b>cạnh Nhà</b> mình vừa dựng. Triều tới nước sẽ luồn vào đúng ô này.',
-   tile:[1,4], nag:'Bấm đúng ô đang nháy vàng.'},
-  {txt:'Bấm <b>TRIỀU LÊN ▲</b> — để ý nước chảy vào ô vừa đào.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b>.'}],
+ [{txt:'The opposite: <b>Dig Canal</b> lowers a tile to <b>let water in</b>. Tap the Dig Canal card.',
+   card:'dig', nag:'Tap the <b>Dig Canal</b> card (the shovel) in the bottom row.'},
+  {txt:'Dig the <b>flashing tile</b> — right <b>next to the House</b> you just built. Next tide the water flows into it.',
+   tile:[1,4], nag:'Tap the tile flashing yellow.'},
+  {txt:'Tap <b>TIDE UP ▲</b> — watch the water flow into the dug tile.',
+   btn:'tidebtn', nag:'Tap the <b>TIDE UP ▲</b> button.'}],
 
- [{txt:'<b>Đê</b> là bức tường: nước <b>không bao giờ</b> qua được. Bấm lá <b>Đê</b>.',
-   card:'levee', nag:'Bấm lá <b>Đê</b> ở hàng lá dưới cùng.'},
-  {txt:'Đắp Đê vào <b>ô đang nháy</b> — ô Đê thì không bị ngập.',
-   tile:[1,2], nag:'Bấm đúng ô đang nháy vàng.'},
-  {txt:'Bấm <b>TRIỀU LÊN ▲</b>.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b>.'}],
+ [{txt:'A <b>Dike</b> is a wall: water <b>never</b> gets past it. Tap the <b>Dike</b> card.',
+   card:'levee', nag:'Tap the <b>Dike</b> card in the bottom row.'},
+  {txt:'Build the Dike on the <b>flashing tile</b> — a Dike tile never floods.',
+   tile:[1,2], nag:'Tap the tile flashing yellow.'},
+  {txt:'Tap <b>TIDE UP ▲</b>.',
+   btn:'tidebtn', nag:'Tap the <b>TIDE UP ▲</b> button.'}],
 
  /* Trieu 5 — bai hoc CUU (chi hoi 30/10 20:55 "lam sao de cuu nha?").
     Cho nay khong phai bay ra: Nha nguoi choi tu dat o trieu 2 nam o (1,3) cao 2,
     trieu 5 nuoc len muc 3 nen NO SAP NGAP THAT. Truoc day bai hoc Coi chiem
     trieu nay, Nha mat am tham va khong ai noi gi — gio dung luc do day cach chua. */
- [{txt:'Thấy số <b>▼1</b> trên ô Nhà không? <b>Triều tới ngập mất cái Nhà đó.</b> Cứu được — bấm lá <b>Đắp Đất</b>.',
-   card:'raise', nag:'Bấm lá <b>Đắp Đất</b> ở hàng lá dưới cùng — mình sắp cứu cái Nhà.'},
-  {txt:'Đắp đất lên <b>chính ô Nhà</b> đang nháy. Ô cao hơn mực nước thì Nhà <b>khô lại</b> — Nhà không phải đập đi.',
-   tile:[1,3], nag:'Bấm đúng ô đang nháy vàng — ô có cái Nhà.'},
-  {txt:'Bấm <b>TRIỀU LÊN ▲</b> — nước lên cao hơn trước mà <b>Nhà vẫn còn</b>.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b>.'}],
+ [{txt:'See the <b>▼1</b> on the House? <b>The next tide will flood it.</b> You can save it — tap the <b>Raise Land</b> card.',
+   card:'raise', nag:'Tap the <b>Raise Land</b> card in the bottom row — let\'s save that House.'},
+  {txt:'Raise <b>the House tile itself</b> (flashing). Above the water line the House <b>stays dry</b> — no need to rebuild.',
+   tile:[1,3], nag:'Tap the tile flashing yellow — the one with the House.'},
+  {txt:'Tap <b>TIDE UP ▲</b> — the water is higher than before, but <b>the House survives</b>.',
+   btn:'tidebtn', nag:'Tap the <b>TIDE UP ▲</b> button.'}],
 
  /* Trieu 6 — bai hoc QUAN TRONG NHAT cua luat moi (chi duyet 02/11):
     Coi chi chay khi NGAP *va* co NHA CON KHO cach <=2 o. O kenh (1,4) da dao
     o trieu 3 nam ngay canh cai Nha (1,3) ma nguoi choi tu dung o trieu 2 va tu
     cuu o trieu 5 — nen bai hoc nay dung tren do chinh nguoi choi lam ra. */
- [{txt:'<b>Cối Nước</b> thì ngược Nhà: <b>ngập mới ra tiền</b>. Nhưng Cối cần <b>người vận hành</b>: phải có <b>Nhà còn khô</b> cách <b>tối đa 2 ô</b>. Bấm lá Cối Nước.',
-   card:'mill', nag:'Bấm lá <b>Cối Nước</b> (bánh xe nước) ở hàng lá dưới.'},
-  {txt:'Đặt Cối vào <b>ô kênh đang ngập</b> đang nháy — nó <b>sát cái Nhà khô</b> của mình, nên Cối có người và chạy được.',
-   tile:[1,4], nag:'Bấm đúng ô đang nháy vàng (ô kênh ngập, cạnh Nhà).'},
-  {txt:'Bấm <b>TRIỀU LÊN ▲</b> — Cối chạy ra Vỏ Sò, Nhà khô cũng được thêm tiền công. <b>Nhà ngập mất thì Cối đứng im</b> — nên cả ván là giữ cho được <b>một Nhà khô cạnh Cối ngập</b>.',
-   btn:'tidebtn', nag:'Bấm nút <b>TRIỀU LÊN ▲</b>.'}],
+ [{txt:'A <b>Water Mill</b> is the opposite of a House: it <b>only pays when flooded</b>. But it needs <b>crew</b>: a <b>dry House</b> at most <b>2 tiles away</b>. Tap the Water Mill card.',
+   card:'mill', nag:'Tap the <b>Water Mill</b> card (the water wheel) in the bottom row.'},
+  {txt:'Put the Mill on the flashing <b>flooded canal tile</b> — it is <b>right next to your dry House</b>, so it has crew and runs.',
+   tile:[1,4], nag:'Tap the tile flashing yellow (the flooded canal next to the House).'},
+  {txt:'Tap <b>TIDE UP ▲</b> — the Mill earns Shells and the dry House gets a wage too. <b>Lose the House and the Mill stops</b> — the whole game is keeping <b>a dry House next to a flooded Mill</b>.',
+   btn:'tidebtn', nag:'Tap the <b>TIDE UP ▲</b> button.'}],
 
  []
 ];
@@ -618,7 +811,7 @@ function easyLesson(tide){
    Cho nay chi doi hinh dat va cho dat Coi, khong doi han chot.
    ============================================================ */
 const ISLANDS=[
-  { n:'Mỏm Tròn', d:'đảo tròn đều, nước gặm từng vành một',
+  { n:'Round Point', d:'a round island, the sea eats it ring by ring',
     h:[0,0,0,0,0,0,0,
        0,2,2,1,2,2,0,     /* o Coi ha san xuong 1: dao 1 nhat la nuoc toi */
        0,2,3,3,3,2,0,
@@ -628,7 +821,7 @@ const ISLANDS=[
        0,0,0,0,0,0,0],
     house:[[2,3],[2,4]], mill:[1,3] },
 
-  { n:'Sống Lưng', d:'dải đất dài Đông–Tây, hai đầu Bắc Nam hở toang',
+  { n:'Spine Ridge', d:'a long East–West ridge, wide open to the North and South',
     h:[0,0,0,0,0,0,0,
        0,0,1,1,1,0,0,
        1,2,3,3,3,2,1,
@@ -638,7 +831,7 @@ const ISLANDS=[
        0,0,0,0,0,0,0],
     house:[[2,3],[4,3]], mill:[1,3] },
 
-  { n:'Vịnh Lõm', d:'có cái vịnh ăn sâu vào góc Tây Nam — chỗ nuôi Cối sẵn',
+  { n:'Hollow Bay', d:'a bay cuts into the South-West corner — a ready spot for Mills',
     h:[0,0,0,0,0,0,0,
        0,2,2,2,2,2,0,
        0,2,3,3,3,2,1,     /* doi cat phia Dong bu lai cho dat bi vinh an mat */
@@ -687,12 +880,12 @@ function newGame(){
   draw3();
   undoClear();
   if(TUT.on && !isEasy()) tutForceHand();
-  if(isEasy()) showHint('Ván Tập: mỗi triều học <b>một</b> thứ. Cứ bấm theo <b>mũi vàng</b>.',0,true);
+  if(isEasy()) showHint('Practice Round: learn <b>one</b> thing per tide. Just follow the <b>yellow arrow</b>.',0,true);
   else setHint(1);
   syncHUD(); renderHand();
   flood(); S.visWater = 0;
   boats.length=0; birds.length=0;
-  if(!isEasy() && !TUT.on && !FAST) toast('Đảo '+ISLANDS[ISLE].n+' — '+ISLANDS[ISLE].d, 3400);
+  if(!isEasy() && !TUT.on && !FAST) toast(ISLANDS[ISLE].n+' — '+ISLANDS[ISLE].d, 3400);
 }
 const idx=(r,c)=>r*GW+c;
 const at=(r,c)=>G[idx(r,c)];
@@ -818,7 +1011,7 @@ function applyCard(k,t){
     case 'house':t.b='house'; S.built++; break;
     case 'mill': case 'mill2': t.b='mill'; t.ruined=false; S.built++; break;
     case 'levee': case 'gate':
-      if(t.b) toast('Đắp đè lên '+({house:'Nhà',mill:'Cối Nước'}[t.b]||'ô cũ'));
+      if(t.b) toast('Built over the '+({house:'House',mill:'Water Mill'}[t.b]||'old tile'));
       t.b=(k==='levee')?'levee':'gate'; t.hp=LEVEE_HP; t.open=false; t.ruined=false; S.built++; break;
     case 'repair': t.hp=LEVEE_HP; break;
   }
@@ -937,7 +1130,7 @@ function syncPanelMore(){
     const left = pn.scrollHeight - pn.clientHeight - pn.scrollTop;
     const more = left > 6;
     ft.classList.toggle('hasmore',more);
-    if(more) m.textContent = window.innerHeight<470 ? '▼ Cuộn xem tiếp' : '▼ Còn nữa ở dưới — bấm xem tiếp';
+    if(more) m.textContent = window.innerHeight<470 ? '▼ Scroll for more' : '▼ More below — tap to scroll';
   });
 }
 document.querySelectorAll('.ov .panel').forEach(pn=>pn.addEventListener('scroll',syncPanelMore,{passive:true}));
@@ -1089,10 +1282,10 @@ function drawTile(t){
       cx.beginPath(); cx.moveTo(bx-br*.45,by+br*.62); cx.lineTo(bx+br*.45,by-br*.62); cx.stroke();
       if(s>=46){
         cx.font='bold '+(s*.145)+'px system-ui,sans-serif'; cx.textAlign='center';
-        const w=cx.measureText('thiếu người').width+s*.1;
+        const w=cx.measureText('no crew').width+s*.1;
         cx.fillStyle='rgba(43,30,20,.82)';
         roundRect(px+s/2-w/2,py+s*.72-lift,w,s*.2,s*.05); cx.fill();
-        cx.fillStyle='#FFD9A0'; cx.fillText('thiếu người',px+s/2,py+s*.865-lift);
+        cx.fillStyle='#FFD9A0'; cx.fillText('no crew',px+s/2,py+s*.865-lift);
       }
       cx.restore();
     }
@@ -1124,7 +1317,7 @@ function drawTile(t){
 
 function drawSeaFrame(){
   const inner=TS*GW, full=inner+PAD*2;
-  cx.fillStyle=C.deep; cx.fillRect(0,0,full,full);
+  cx.fillStyle='#5cbfd2'; cx.fillRect(0,0,full,full);
   for(let i=0;i<22;i++){
     const t=(i*0.618)%1, ph=now*0.0009+i;
     cx.strokeStyle='rgba(255,255,255,'+(0.07+0.05*Math.sin(ph))+')';
@@ -1350,7 +1543,7 @@ function frame(ts){
    ============================================================ */
 const $=id=>document.getElementById(id);
 function syncHUD(){
-  $('tideTxt').textContent='Triều '+Math.min(S.tide,nTides())+'/'+nTides();
+  $('tideTxt').textContent=''+Math.min(S.tide,nTides())+'/'+nTides();
   $('p-tide').classList.toggle('big',isBig(S.tide));
   $('waterTxt').textContent=S.water;
   $('waterbar').firstElementChild.style.width=Math.round(S.water/maxLevel()*100)+'%';
@@ -1364,8 +1557,8 @@ function syncHUD(){
      Dai Trieu KHONG day nuoc them: no an 2 do ben De/Cong (xem endTide). Bang so
      luot 3 co Dai Trieu trieu 6 ma nuoc dung yen → cau cu "DAI TRIEU +2" la sai. */
   $('tideBtnSub').textContent = big
-    ? ('ĐẠI TRIỀU' + (nxt>0?(' · nước +'+nxt):' · ăn độ bền Đê'))
-    : (nxt>0?('nước +'+nxt):'nước đứng yên');
+    ? ('SPRING TIDE' + (nxt>0?(' · water +'+nxt):' · hurts Dikes'))
+    : (nxt>0?('water +'+nxt):'water stays');
   $('tidebtn').classList.toggle('big',big);
   $('tidebtn').disabled = S.phase!=='place';
   if(hasImg('icon_shell_coin')) $('icoShell').src=IMG['icon_shell_coin'].src;
@@ -1380,31 +1573,30 @@ function goalProg(){
   const pct=Math.min(100,Math.round(earned/goal*100));
   /* vach moc tren thanh: cho thay con moc nao phia truoc */
   const marks=nGates().map(g=>'<u style="left:'+Math.min(99,g.need/goal*100)+'%"></u>').join('');
-  return '<span id="goalwrap">🐚 Sò kiếm được <b>'+earned+'/'+goal+'</b>'
+  return '<span id="goalwrap">🐚 Earned <b>'+earned+'/'+goal+'</b>'
        + '<span id="goalprog"><i style="width:'+pct+'%"></i>'+marks+'</span></span>';
 }
 function syncGoal(){
   const tidesLeft = Math.max(0, nTides() - S.tide + 1);
   if(isEasy()){
     $('goalbar').innerHTML = goalProg()
-     + '<span>🎓 <b>Ván Tập</b>: trụ hết ' + EASY.TIDES + ' triều — <b>còn ' + tidesLeft + '</b></span>'
-     + '<span>🛡 Ván này <b>không thể thua</b></span>';
+     + '<span>🎓 <b>Practice</b>: last ' + EASY.TIDES + ' tides — <b>' + tidesLeft + ' left</b></span>'
+     + '<span>🛡 You <b>can\'t lose</b> this round</span>';
     return;
   }
   const earned=Math.round(S.earned), g=gateNext(S.tide);
   /* Moi cum phai NGAN: man 320px thi span nowrap dai hon dai la bi cat cut
      (loi §15 cu). Cau giai thich day du nam o bang luat ?, khong nhoi vao day. */
   let html = goalProg()
-   + '<span class="'+(earned<(g?g.need:GOAL)?'':'')+'">🚩 Mốc triều <b>'+(g?g.t:TIDES)
-   + '</b>: <b>'+(g?g.need:GOAL)+'</b> sò</span>'
-   + '<span class="' + (S.towerHp<=1?'bad':'') + '">💀 Thua nếu Tháp ngập '
-   + TOWER_HP + ' — <b>còn ' + S.towerHp + '</b></span>'
-   + '<span>⏳ <b>Còn '+tidesLeft+'</b> triều</span>';
+   + '<span class="'+(earned<(g?g.need:GOAL)?'':'')+'">🚩 Need <b>'+(g?g.need:GOAL)+'</b> by tide <b>'+(g?g.t:TIDES)
+   + '</b></span>'
+   + '<span class="' + (S.towerHp<=1?'bad':'') + '">🗼 Tower lives <b>' + S.towerHp + '/' + TOWER_HP + '</b></span>'
+   + '<span>⏳ <b>'+tidesLeft+'</b> tides left</span>';
   /* bao truoc 1-2 trieu neu dang tut sau moc (chi nhan 02/11) */
   if(g && earned<g.need && g.t-S.tide<=2){
     const thieu=g.need-earned, con=g.t-S.tide+1;
-    html += '<span class="warnrow">⚠ Còn <b>'+con+'</b> triều tới mốc triều <b>'+g.t
-      + '</b> mà thiếu <b>'+thieu+'</b> sò — thiếu là <b>thua</b>. Thêm <b>Cối ngập cạnh Nhà khô</b>!</span>';
+    html += '<span class="warnrow">⚠ <b>'+con+'</b> tide(s) to the tide <b>'+g.t
+      + '</b> target and you are <b>'+thieu+'</b> Shells short — short means <b>you lose</b>. Add <b>flooded Mills next to dry Houses</b>!</span>';
   }
   $('goalbar').innerHTML = html;
 }
@@ -1422,7 +1614,7 @@ function renderHand(){
   /* Cong khong co o tay la dau game (mo ban tu trieu 5), nen day rieng luc no xuat hien */
   if(S.hand.some(c=>c.k==='gate'&&!c.used) && !LS.get('tm_tip_gate')){
     LS.set('tm_tip_gate','1');
-    showHint('Lá <b>Cống</b>: xây xong thì <b>bấm vào ô Cống</b> để MỞ (cho nước vào nuôi Cối) hay ĐÓNG (chắn nước y như Đê).',12000);
+    showHint('<b>Sluice</b> card: once built, <b>tap the Sluice tile</b> to OPEN it (let water in for Mills) or CLOSE it (blocks water like a Dike).',12000);
   }
 }
 /* to sang dung cho can bam, lam mo cho khong duoc bam */
@@ -1459,19 +1651,19 @@ function tutFinish(){
   TUT.on=false; TUT.i=0;
   LS.set('tm_tut_done','1');
   tutPaint(); renderHand(); syncHUD();
-  showHint('Hết hướng dẫn. Nhớ: <b>4 ô sát Tháp Mẫu phải là Đê trước triều 4</b>, và <b>Cối phải ngập mới ra tiền</b>. Bấm <b>?</b> trên cùng để xem lại luật.',0);
+  showHint('Guide finished. Remember: <b>the 4 tiles next to the Mother Tower should be Dikes before tide 4</b>, and <b>Mills only pay when flooded</b>. Tap <b>?</b> at the top to see the rules again.',0);
 }
 function tutSkip(){
   if(isEasy()){
     EASY_TUT=false; TUT.on=false; TUT.i=0;
     tutPaint(); renderHand(); syncHUD();
-    showHint('Đã tắt hướng dẫn. Cứ chơi thoải mái — ván Tập <b>không thua được</b>.',0);
-    toast('Đã tắt hướng dẫn Ván Tập',2600); return;
+    showHint('Guide turned off. Play freely — you <b>can\'t lose</b> the Practice Round.',0);
+    toast('Practice guide turned off',2600); return;
   }
   TUT.on=false; LS.set('tm_tut_done','1');
   tutPaint(); renderHand(); syncHUD();
   showHint(tileInfoDefault(),0,true);
-  toast('Đã bỏ hướng dẫn — bấm ? trên cùng để xem lại luật', 2600);
+  toast('Guide skipped — tap ? at the top to see the rules', 2600);
 }
 /* tay la dau van co dinh khi co huong dan: phai co du Dao Kenh + De */
 function tutForceHand(){
@@ -1483,10 +1675,10 @@ function tutForceHand(){
 }
 let hintTimer=null;
 function setHint(n){
-  const H={1:'Nước đang lên. Đặt lá rồi bấm <b>TRIỀU LÊN ▲</b>.',
-           2:'<b>Cối Nước chỉ ra tiền khi bị NGẬP</b> — đào kênh dẫn nước tới nó.',
-           3:'Triều '+BIGTIDE[0]+' là <b>ĐẠI TRIỀU</b> — nó <b>ăn 2 độ bền</b> Đê/Cống sát nước. '
-             +'Nước không bao giờ qua <b>Đê</b> — quây Đê chắn đường nước vào Tháp Mẫu.'};
+  const H={1:'The water is rising. Place cards, then tap <b>TIDE UP ▲</b>.',
+           2:'<b>A Water Mill only pays when FLOODED</b> — dig a canal to bring water to it.',
+           3:'Tide '+BIGTIDE[0]+' is a <b>SPRING TIDE</b> — it <b>takes 2 durability</b> from Dikes/Sluices touching water. '
+             +'Water never passes a <b>Dike</b> — ring the Mother Tower with Dikes.'};
   if(H[n]) showHint(H[n],9000);
 }
 /* Tren dien thoai, trong luc co huong dan dan tay, hai thanh chi dan chong len nhau:
@@ -1508,7 +1700,7 @@ function showHint(html,ms,soft){
     $('hintTxt').innerHTML=tileInfoDefault(); hintSoft=true; syncHintbar(); } },ms);
 }
 function tileInfoDefault(){
-  if(S.phase==='place') return 'Chọn một lá ở dưới, rồi bấm vào ô sáng viền vàng.';
+  if(S.phase==='place') return 'Pick a card below, then tap a tile with a yellow border.';
   return '';
 }
 let toastT=null;
@@ -1528,17 +1720,17 @@ function selectCard(i){
   if(tcur && (!tcur.card || c.k!==tcur.card)){ tutNag(); return; }
   if(CARD[c.k].tg===0){            // lá tác dụng toàn cục: chơi ngay
     const n=G.filter(t=>(t.b==='levee'||t.b==='gate')&&t.hp<LEVEE_HP);
-    if(!n.length){ SFX.bad(); toast('Chưa có Đê/Cống nào cần vá'); return; }
-    undoMark('dùng lá '+CARD[c.k].n);
+    if(!n.length){ SFX.bad(); toast('No Dike/Sluice needs patching'); return; }
+    undoMark('used '+CARD[c.k].n);
     n.forEach(t=>{t.hp=LEVEE_HP;t.pop=1;});
     c.used=true; S.sel=-1; S.picks=[]; SFX.build();
-    toast('Vá đầy '+n.length+' Đê/Cống'); renderHand(); syncHUD(); return;
+    toast('Patched '+n.length+' Dike(s)/Sluice(s)'); renderHand(); syncHUD(); return;
   }
   S.sel = (S.sel===i) ? -1 : i;
   S.picks=[];
   renderHand();
   /* dan tay: thanh xanh da noi ro hon → mo ta la thanh hint MEM cho khoi chong 2 thanh */
-  if(S.sel>=0) showHint('<b>'+CARD[c.k].n+'</b> — '+CARD[c.k].d+(CARD[c.k].tg>1?' (chọn '+CARD[c.k].tg+' ô)':'')+'. Bấm ô viền vàng.',6000,!!tcur);
+  if(S.sel>=0) showHint('<b>'+CARD[c.k].n+'</b> — '+CARD[c.k].d+(CARD[c.k].tg>1?' (pick '+CARD[c.k].tg+' tiles)':'')+'. Tap a yellow-bordered tile.',6000,!!tcur);
   if(tcur && S.sel>=0) tutNext();
   else tutPaint();
 }
@@ -1572,26 +1764,26 @@ cv.addEventListener('touchend',ev=>{
 },{passive:true});
 
 function describe(t){
-  const names={house:'Nhà',mill:'Cối Nước',levee:'Đê',gate:'Cống'};
-  let s='Ô ('+(t.r+1)+','+(t.c+1)+') · cao '+t.h+' · '+(t.wet?'NGẬP':'khô');
-  if(t.tower) s+=' · <b>Tháp Mẫu</b> · độ bền '+S.towerHp+'/'+TOWER_HP+' (hết bền là thua)';
+  const names={house:'House',mill:'Water Mill',levee:'Dike',gate:'Sluice'};
+  let s='Tile ('+(t.r+1)+','+(t.c+1)+') · height '+t.h+' · '+(t.wet?'FLOODED':'dry');
+  if(t.tower) s+=' · <b>Mother Tower</b> · lives '+S.towerHp+'/'+TOWER_HP+' (0 = you lose)';
   else if(t.b){ s+=' · <b>'+names[t.b]+'</b>';
-    if(t.b==='levee'||t.b==='gate') s+=' (bền '+t.hp+'/'+LEVEE_HP+(t.b==='gate'?(t.open?', đang MỞ — bấm để đóng':', đang ĐÓNG — bấm để mở'):'')+')';
-    const inc=tileIncome(t); s+= inc?' · +'+inc+' Vỏ Sò/triều':' · chưa ra tiền';
+    if(t.b==='levee'||t.b==='gate') s+=' (durability '+t.hp+'/'+LEVEE_HP+(t.b==='gate'?(t.open?', OPEN — tap to close':', CLOSED — tap to open'):'')+')';
+    const inc=tileIncome(t); s+= inc?' · +'+inc+' Shells/tide':' · earning nothing';
     /* Coi dung banh thi noi THANG ly do + cach go, ngay trong tooltip o */
     if(t.b==='mill'){
-      if(!t.wet) s+='<br>💤 Cối <b>chưa ngập</b> nên chưa chạy — <b>Đào Kênh</b> hạ ô này xuống cho nước tới.';
-      else if(!millStaffed(t)) s+='<br>🚫 <b>Cối thiếu người vận hành.</b> Cối chỉ chạy khi có <b>Nhà còn khô</b> '
-        +'cách tối đa <b>'+MILL_REACH+' ô</b> (đi ngang/dọc). Dựng <b>Nhà</b> gần đây rồi quây <b>Đê/Cống</b> giữ cho Nhà đó khô.';
-      else s+='<br>⚙ Đang chạy — có <b>Nhà khô</b> gần đây lo người vận hành.';
+      if(!t.wet) s+='<br>💤 The Mill is <b>not flooded</b>, so it is idle — <b>Dig Canal</b> to lower this tile so water reaches it.';
+      else if(!millStaffed(t)) s+='<br>🚫 <b>This Mill has no crew.</b> A Mill only runs with a <b>dry House</b> '
+        +'at most <b>'+MILL_REACH+' tiles</b> away (straight steps). Build a <b>House</b> nearby and wall it with <b>Dikes/Sluices</b> to keep it dry.';
+      else s+='<br>⚙ Running — a <b>dry House</b> nearby provides crew.';
     }
     if(t.b==='house' && !t.wet){
       const m=G.filter(o=>millRunning(o)&&near(t,o)).length;
-      s+= m?'<br>👷 Nhà này đang lo người cho <b>'+m+' Cối</b> gần đó (+'+(m*MILL_WAGE)+' Vỏ Sò).'
-           :'<br>👷 Chưa có Cối nào chạy trong tầm '+MILL_REACH+' ô — đặt <b>Cối</b> vào ô ngập gần đây để Nhà này có tiền công.';
+      s+= m?'<br>👷 This House crews <b>'+m+' Mill(s)</b> nearby (+'+(m*MILL_WAGE)+' Shells).'
+           :'<br>👷 No Mill running within '+MILL_REACH+' tiles — put a <b>Mill</b> on a flooded tile nearby so this House earns a wage.';
     }
   }
-  else if(t.ruined) s+=' · <b>đổ nát</b> — <b>Đắp Đất</b> một nhát là dọn xong, dựng <b>Nhà</b> lại được. (Đê / Cống / Cối thì đắp lên luôn được.)';
+  else if(t.ruined) s+=' · <b>ruined</b> — one <b>Raise Land</b> clears it so you can build a <b>House</b> again. (Dikes / Sluices / Mills can be built right on top.)';
   /* O sap ngap ma dang co Nha/Ben: noi luon CACH CHUA, khong chi bao "sap ngap".
      Chi hoi 30/10 20:55 "lam sao de cuu nha?" — bao nguy ma khong chi cach go
      thi nguoi choi chi biet dung xem no mat. */
@@ -1610,15 +1802,15 @@ function rescueTip(t){
      deu VO ICH, chi De/Cong (buc tuong that) con chan duoc. Noi du 3 cach luc do
      la chi dan sai: nguoi choi dap het la Dap Dat roi van mat Nha. */
   if(nw>MAXH){
-    return '<br>⚠ <b>Triều tới ngập mất ô này.</b> Nước đã cao hơn mức đất đắp được '
-      + '(đất tối đa cao '+MAXH+'), nên <b>đắp đất không cứu được nữa</b> — '
-      + 'chỉ <b>Đê</b> hoặc <b>Cống đóng</b> chắn được đường nước vào ô này.';
+    return '<br>⚠ <b>The next tide floods this tile.</b> The water is above the highest land you can build '
+      + '(max height '+MAXH+'), so <b>Raise Land can\'t save it</b> — '
+      + 'only a <b>Dike</b> or a <b>closed Sluice</b> can block the water\'s path here.';
   }
   const need=Math.max(1,nw-t.h);
-  return '<br>⚠ <b>Triều tới ngập mất ô này.</b> Cứu bằng 1 trong 3 cách: '
-    + '<b>Đắp Đất</b> lên chính ô này ('+need+' nhát là đủ cao) · '
-    + '<b>Đê</b> (hoặc <b>Cống đóng</b>) chắn ô nước đang luồn vào · '
-    + '<b>Đắp Đất</b> ô kề thấp trên đường nước vào.';
+  return '<br>⚠ <b>The next tide floods this tile.</b> Save it one of 3 ways: '
+    + '<b>Raise Land</b> on this tile ('+need+' time(s) is enough) · '
+    + 'a <b>Dike</b> (or <b>closed Sluice</b>) on the tile the water comes through · '
+    + '<b>Raise Land</b> on the low neighbour in the water\'s path.';
 }
 /* ============================================================
    HOAN TAC 1 BUOC (chi yeu cau 03/11 16:52 — "cho nut undo 1 step voi nhe")
@@ -1645,20 +1837,20 @@ function syncUndo(){
   const b=$('undobtn'); if(!b) return;
   const can=canUndo();
   b.disabled=!can;
-  b.title = can ? ('Hoàn tác: '+(undoLabel||'1 bước')+'  (Ctrl+Z)')
-                : 'Chưa có bước nào để hoàn tác (không lùi qua Triều lên)';
+  b.title = can ? ('Undo: '+(undoLabel||'1 step')+'  (Ctrl+Z)')
+                : 'Nothing to undo (you can\'t undo past Tide Up)';
 }
 function doUndo(){
-  if(!canUndo()){ SFX.bad(); toast('Không có bước nào để hoàn tác'); return false; }
+  if(!canUndo()){ SFX.bad(); toast('Nothing to undo'); return false; }
   const u=UNDO, lb=undoLabel; UNDO=null; undoLabel='';
   u.G.forEach((o,i)=>Object.assign(G[i],o));   /* do vao dung o cu: khong doi identity */
   Object.assign(S,u.S);
   TUT.on=u.tut.on; TUT.i=u.tut.i; RNGST=u.rng;
   flood(); renderHand(); syncHUD(); tutPaint(); syncUndo();
   SFX.gate();
-  toast('↶ Đã hoàn tác'+(lb?': '+lb:''));
-  showHint('Đã lùi lại 1 bước'+(lb?' (<b>'+lb+'</b>)':'')
-    +'. Chỉ lùi được <b>1 bước</b>, và <b>không lùi qua TRIỀU LÊN</b>.',4200);
+  toast('↶ Undone'+(lb?': '+lb:''));
+  showHint('Went back 1 step'+(lb?' (<b>'+lb+'</b>)':'')
+    +'. You can undo only <b>1 step</b>, and <b>not past TIDE UP</b>.',4200);
   return true;
 }
 
@@ -1671,17 +1863,17 @@ function tapTile(t){
   }
   if(S.sel<0){
     if(t.b==='gate'){
-      undoMark(t.open?'đóng Cống':'mở Cống');
+      undoMark(t.open?'close Sluice':'open Sluice');
       t.open=!t.open; SFX.gate(); flood();
       if(t.open) setTimeout(()=>SFX.water(),120);
-      toast(t.open?'Cống MỞ — nước đang tràn vào':'Cống ĐÓNG'); syncHUD(); return;
+      toast(t.open?'Sluice OPEN — water flows in':'Sluice CLOSED'); syncHUD(); return;
     }
     showHint(describe(t),4500); return;
   }
   const c=S.hand[S.sel], d=CARD[c.k];
-  if(!canPlay(c.k,t)){ SFX.bad(); toast('Không đặt được ở ô này'); return; }
+  if(!canPlay(c.k,t)){ SFX.bad(); toast('Can\'t place that here'); return; }
   /* la nhieu o: chup o lan chon dau tien, nen hoan tac tra lai CA la */
-  if(!S.picks.length) undoMark('đặt lá '+d.n);
+  if(!S.picks.length) undoMark('placed '+d.n);
   applyCard(c.k,t);
   if(c.k==='dig'||c.k==='deep') SFX.dig(); else SFX.build();
   if(d.tg>1){
@@ -1690,9 +1882,9 @@ function tapTile(t){
   }
   c.used=true; S.sel=-1; S.picks=[];
   flood(); renderHand(); syncHUD();
-  if(c.k==='gate') showHint('Xây <b>Cống</b> rồi — <b>bấm vào ô Cống</b> để MỞ cho nước vào, bấm lần nữa để ĐÓNG chắn nước.',10000);
+  if(c.k==='gate') showHint('<b>Sluice</b> built — <b>tap the Sluice tile</b> to OPEN it and let water in, tap again to CLOSE it.',10000);
   if(tcur) { tutNext(); return; }
-  if(S.hand.every(x=>x.used)) showHint('Hết lá. Bấm <b>TRIỀU LÊN ▲</b>.',0);
+  if(S.hand.every(x=>x.used)) showHint('No cards left. Tap <b>TIDE UP ▲</b>.',0);
 }
 
 /* ============================================================
@@ -1729,7 +1921,7 @@ async function endTide(){
         if(t.hp<=0){ t.b=null; t.hp=0; broke=true; SFX.break(); }
       }
     }
-    if(broke){ toast('Đê vỡ!'); flood(); await sleep(700); }
+    if(broke){ toast('A Dike broke!'); flood(); await sleep(700); }
   }
 
   /* 3. công trình bị ngập → phá huỷ */
@@ -1737,7 +1929,7 @@ async function endTide(){
   for(const t of G){
     if(t.wet && t.b==='house'){ t.b=null; t.ruined=true; t.shake=1; lost++; S.lost++; }
   }
-  if(lost){ SFX.break(); toast(lost+' công trình bị nước phá!'); await sleep(650); }
+  if(lost){ SFX.break(); toast(lost+' building(s) lost to the water!'); await sleep(650); }
 
   /* 4. Tháp Mẫu ngập → mất 1 độ bền (0 là thua).
      Van Tap thi mien han; ban day du thi trieu 1..GRACE cung chi canh bao,
@@ -1745,19 +1937,19 @@ async function endTide(){
   if(at(3,3).wet && (isEasy() || S.tide<=EASY.GRACE)){
     at(3,3).shake=1; SFX.bad();
     if(isEasy()){
-      toast('Nước tới Tháp Mẫu — Ván Tập không mất mạng',2600);
-      showHint('Nước tới <b>Tháp Mẫu</b> rồi, nhưng Ván Tập <b>không thua được</b>. Ở bản đầy đủ thì phải quây <b>Đê</b> chắn lại.',0);
+      toast('Water reached the Mother Tower — no life lost in Practice',2600);
+      showHint('Water reached the <b>Mother Tower</b>, but you <b>can\'t lose</b> the Practice Round. In the full game, wall it off with <b>Dikes</b>.',0);
     } else {
-      toast('Nước tới Tháp Mẫu — triều '+EASY.GRACE+' trở xuống chưa mất mạng',2800);
-      showHint('<b>Nước đã vào tới Tháp Mẫu.</b> Triều 1–'+EASY.GRACE+' còn được tha, <b>từ triều '+(EASY.GRACE+1)+' là mỗi lần ngập mất 1 mạng</b> — quây <b>Đê</b> kín 4 ô quanh tháp.',0);
+      toast('Water reached the Mother Tower — no life lost up to tide '+EASY.GRACE,2800);
+      showHint('<b>Water reached the Mother Tower.</b> Tides 1–'+EASY.GRACE+' are forgiven; <b>from tide '+(EASY.GRACE+1)+' each flood costs 1 life</b> — wall all 4 tiles around it with <b>Dikes</b>.',0);
     }
     await sleep(900);
   }
   else if(at(3,3).wet){
     S.towerHp--; at(3,3).shake=1; SFX.bad(); syncHUD();
     if(S.towerHp<=0){ await sleep(500); gameOver(false,'tower'); return; }
-    toast('Tháp Mẫu bị ngập! Độ bền còn '+S.towerHp+'/'+TOWER_HP,2600);
-    showHint('<b>Nước đã vào tới Tháp Mẫu.</b> Quây <b>Đê</b> chắn hết 4 ô quanh tháp, không thì thua.',0);
+    toast('Mother Tower flooded! Lives left '+S.towerHp+'/'+TOWER_HP,2600);
+    showHint('<b>Water reached the Mother Tower.</b> Wall all 4 tiles around it with <b>Dikes</b>, or you will lose.',0);
     await sleep(900);
   }
 
@@ -1779,15 +1971,15 @@ async function endTide(){
     for(let i=0;i<steps;i++){ S.shells+=per; S.earned+=per; syncHUD(); SFX.coin(); await sleep(45); }
     S.shells=Math.round(S.shells); S.earned=Math.round(S.earned);
     $('shellTxt').textContent=S.shells;
-    toast('+'+gain+' Vỏ Sò');
-  } else { toast('Triều này không thu được gì'); }
+    toast('+'+gain+' Shells');
+  } else { toast('Nothing earned this tide'); }
   S.log.push({tide:S.tide,gain,water:S.water,shells:S.shells,earned:Math.round(S.earned)});
   await sleep(350);
 
   /* 6. ĐỦ GOAL SÒ KIẾM ĐƯỢC → THẮNG NGAY, khỏi cần hết triều (chị nhắn 02/11).
      Van Tap thi khong thang som: con bai hoc cua cac trieu sau phai hoc het. */
   if(S.earned>=nGoal() && !isEasy()){
-    toast('🎉 Đủ '+GOAL+' Vỏ Sò kiếm được!',2200);
+    toast('🎉 '+GOAL+' Shells earned!',2200);
     await sleep(700); gameOver(true,'goal'); return;
   }
 
@@ -1797,13 +1989,13 @@ async function endTide(){
   if(gt){
     if(isEasy()){
       const du=S.earned>=gt.need;
-      toast('🚩 Mốc thử: cần '+gt.need+' Vỏ Sò — đang có '+Math.round(S.earned),2800);
-      showHint('🚩 Đây là một <b>mốc</b>. Ở <b>bản đầy đủ</b>, hết <b>Đại Triều</b> mà <b>Sò kiếm được</b> chưa tới mốc là <b>thua ngay</b>'
-        +(du?' — mốc này chị đã đạt.':' — mốc này chị chưa đạt, nhưng Ván Tập không thua.')
-        +' Nên phải dựng <b>Nhà khô</b> và <b>Cối ngập</b> để ra sò.',0);
+      toast('🚩 Practice target: '+gt.need+' Shells needed — you have '+Math.round(S.earned),2800);
+      showHint('🚩 This is a <b>target</b>. In the <b>full game</b>, if <b>Shells earned</b> are below the target after a <b>Spring Tide</b>, <b>you lose at once</b>'
+        +(du?' — you made this one.':' — you missed this one, but Practice can\'t be lost.')
+        +' So build <b>dry Houses</b> and <b>flooded Mills</b> to earn Shells.',0);
       await sleep(1200);
     } else if(S.earned<gt.need){
-      SFX.bad(); toast('Thiếu Vỏ Sò ở mốc Đại Triều!',2600);
+      SFX.bad(); toast('Short of Shells at the Spring Tide target!',2600);
       await sleep(900); gameOver(false,'gate'); return;
     }
   }
@@ -1839,11 +2031,11 @@ function openMarket(){
   if(hurt && CARD.repair.unlock<=S.tide && !shop.includes('repair')) shop[3]='repair';
   else if(S.tide>=2 && !shop.some(k=>k==='levee'||k==='gate'||k==='repair')) shop[3]='levee';
   renderShop();
-  $('shopSub').textContent='Mua ở Chợ KHÔNG trừ Sò kiếm được — lá mua về dùng ngay triều sau';
+  $('shopSub').textContent='Buying does NOT lower Shells earned — cards you buy are ready next tide';
   $('ovMarket').classList.add('on');
   /* Cau nhac truoc do ("👉 Bam nut TRIEU LEN...") con dinh tren thanh vang trong khi
      cho da che mat nut do -> bao nguoi choi lam dung thu khong bam duoc. Xoa khi mo cho. */
-  showHint('Chợ mở cuối mỗi triều. Mua xong bấm <b>Xong, TRIỀU TỚI ▶</b>.',0,true);
+  showHint('The Market opens after every tide. When done, tap <b>Done, NEXT TIDE ▶</b>.',0,true);
   syncHUD();
   if(TUT.on && !TUT.cur().market){ TUT.i=TUT.steps.length-1; }
   tutPaint();
@@ -1867,7 +2059,7 @@ function buy(i){
      Để vào chồng thải thì tới triều 5-6 mới rút ra, không kịp cứu Tháp Mẫu. */
   S.shells-=d.price; S.deck.push(k); shop.splice(i,1);
   SFX.coin(); syncHUD(); renderShop();
-  $('shopSub').textContent='Đã mua '+d.n+' — ví còn '+S.shells+' Vỏ Sò (không trừ Sò kiếm được)';
+  $('shopSub').textContent='Bought '+d.n+' — wallet: '+S.shells+' Shells (does not lower Shells earned)';
 }
 function closeMarket(){
   $('ovMarket').classList.remove('on');
@@ -1883,9 +2075,9 @@ function nextTide(){
   if(isEasy()){
     easyLesson(S.tide);
     if(!warnNextTide()){
-      if(S.tide===EASY.TIDES) showHint('Triều cuối của Ván Tập. Làm gì cũng được — <b>không thua được</b>. '
-        +'Nhớ nhé: ở <b>bản đầy đủ</b>, đủ <b>'+GOAL+' sò</b> là <b>thắng</b>, thiếu sò ở <b>mốc</b> là <b>thua</b>. '
-        +'Bấm <b>TRIỀU LÊN ▲</b> là xong.',0);
+      if(S.tide===EASY.TIDES) showHint('Last tide of the Practice Round. Do anything — <b>you can\'t lose</b>. '
+        +'Remember: in the <b>full game</b>, <b>'+GOAL+' Shells</b> means <b>you win</b>, falling short at a <b>target</b> means <b>you lose</b>. '
+        +'Tap <b>TIDE UP ▲</b> to finish.',0);
       else showHint(tileInfoDefault(),0,true);
     }
     return;
@@ -1893,10 +2085,10 @@ function nextTide(){
   /* bao truoc mat cong trinh / mat thap thi uu tien hon moi hint khac */
   if(warnNextTide()){ /* da co canh bao */ }
   else if(S.tide<=3) setHint(S.tide);
-  else if(newly.length) showHint('Chợ mở lá mới: <b>'+newly.map(k=>CARD[k].n).join(', ')+'</b>',6000);
-  else if(S.tide===nTides()-1) showHint('<b>Triều cuối đang tới</b> — dồn hết vào lượt thu này.',6000);
+  else if(newly.length) showHint('New cards in the Market: <b>'+newly.map(k=>CARD[k].n).join(', ')+'</b>',6000);
+  else if(S.tide===nTides()-1) showHint('<b>The last tide is coming</b> — put everything into this harvest.',6000);
   else showHint(tileInfoDefault(),0,true);
-  if(isBig(S.tide)) toast('⚠ Triều tới là ĐẠI TRIỀU — ăn 2 độ bền Đê/Cống',2600);
+  if(isBig(S.tide)) toast('⚠ Next tide is a SPRING TIDE — Dikes/Sluices lose 2 durability',2600);
 }
 /* Noi thang bang chu cai gi se mat o trieu toi — mau sac khong du de hieu.
    Tra ve true neu da chiem thanh hint. */
@@ -1904,29 +2096,29 @@ function warnNextTide(){
   if(S.phase==='over') return false;
   const f=floodCalc(levelOf(S.tide));
   if(!at(3,3).wet && f.wet[idx(3,3)] && !isEasy()){
-    showHint('⚠ <b>Triều tới nước vào tới Tháp Mẫu</b>'
-      +(S.tide<=EASY.GRACE?' (triều '+S.tide+' chưa mất mạng, nhưng tập quây đi)':' — ngập là mất 1 mạng')
-      +' — quây <b>Đê</b> các ô trống quanh tháp, hoặc <b>Đắp Đất</b> cho cao lên.',0);
+    showHint('⚠ <b>Next tide the water reaches the Mother Tower</b>'
+      +(S.tide<=EASY.GRACE?' (no life lost at tide '+S.tide+', but practise walling it)':' — a flood costs 1 life')
+      +' — put <b>Dikes</b> on the open tiles around it, or <b>Raise Land</b>.',0);
     return true;
   }
   const doomed=G.filter(t=>!t.wet && f.wet[idx(t.r,t.c)] && t.b==='house');
   if(doomed.length){
-    const what='Nhà';
+    const what='House(s)';
     /* Ke thang cach cuu — bao "sap ngap" ma khong chi cach go thi vo ich.
        Nuoc vuot MAXH thi dap dat het tac dung, chi con De/Cong (xem rescueTip). */
-    const head='⚠ <b>Triều tới ngập mất '+doomed.length+' '+what+'</b> — ô <b>viền gạch xanh có số ▼</b> là ô sắp ngập. ';
+    const head='⚠ <b>Next tide floods '+doomed.length+' '+what+'</b> — tiles with a <b>blue hatched border and ▼ number</b> are about to flood. ';
     showHint(head + (levelOf(S.tide)>MAXH
-      ? 'Nước đã cao hơn mức đất đắp được — <b>chỉ Đê hoặc Cống đóng</b> cứu được. Bấm <b>?</b> để xem hình.'
-      : '<b>3 cách cứu:</b> ① <b>Đắp Đất</b> lên chính ô đó · ② <b>Đê</b>/<b>Cống đóng</b> chắn ô nước luồn vào · '
-        +'③ <b>Đắp Đất</b> ô kề thấp trên đường nước. Bấm <b>?</b> để xem hình.'),0);
+      ? 'The water is above the highest land you can build — <b>only a Dike or closed Sluice</b> can save it. Tap <b>?</b> for pictures.'
+      : '<b>3 ways to save it:</b> ① <b>Raise Land</b> on that tile · ② a <b>Dike</b>/<b>closed Sluice</b> where the water comes in · '
+        +'③ <b>Raise Land</b> on the low neighbour in the water\'s path. Tap <b>?</b> for pictures.'),0);
     return true;
   }
   /* Coi ngap ma thieu nguoi thi im lang la mat tien ca van ma khong ai biet */
   const idleMill=G.filter(t=>t.b==='mill'&&t.wet&&!millStaffed(t));
   if(idleMill.length){
-    showHint('🚫 <b>'+idleMill.length+' Cối đang ngập mà đứng im</b> (ô viền đỏ gạch) — '
-      +'Cối chỉ chạy khi có <b>Nhà còn khô</b> cách tối đa <b>'+MILL_REACH+' ô</b>. '
-      +'Dựng <b>Nhà</b> gần đó và quây <b>Đê/Cống</b> giữ ô Nhà khỏi ngập.',0);
+    showHint('🚫 <b>'+idleMill.length+' flooded Mill(s) standing idle</b> (red hatched border) — '
+      +'a Mill only runs with a <b>dry House</b> at most <b>'+MILL_REACH+' tiles</b> away. '
+      +'Build a <b>House</b> nearby and wall it with <b>Dikes/Sluices</b> to keep it dry.',0);
     return true;
   }
   return false;
@@ -1959,30 +2151,30 @@ function gameOver(survived,why){
   S.over={survived,why,houses,mills,tides,left,stars,earned,score};
   const gi=GATES.findIndex(g=>g.t===S.tide);
   $('endTitle').textContent = survived
-    ? ('Đủ '+GOAL+' Vỏ Sò — THẮNG!')
-    : (why==='gate' ? ('Thiếu sò ở mốc Đại Triều '+(gi+1))
-    : (why==='timeout' ? ('Hết '+TIDES+' con triều mà chưa đủ sò') : 'Tháp Mẫu đã sập'));
+    ? (GOAL+' Shells — YOU WIN!')
+    : (why==='gate' ? ('Short of Shells at Spring Tide target '+(gi+1))
+    : (why==='timeout' ? ('All '+TIDES+' tides gone, not enough Shells') : 'The Mother Tower fell'));
   $('endSub').textContent = survived
-    ? ('Thắng ở triều '+S.tide+'/'+TIDES+(left?(' — còn dư '+left+' con triều.'):' — đúng triều cuối.'))
-    : (why==='gate' ? ('Hết triều '+S.tide+' cần '+(GATES[gi]?GATES[gi].need:0)
-        +' Vỏ Sò kiếm được, mới có '+earned+'.')
-    : (why==='timeout' ? ('Cần '+GOAL+' Vỏ Sò kiếm được, mới có '+earned+'.')
-    : ('Tháp ngập '+TOWER_HP+' lần, thua ở triều '+S.tide+' (mực nước '+S.water+').')));
+    ? ('Won on tide '+S.tide+'/'+TIDES+(left?(' — '+left+' tide(s) to spare.'):' — on the very last tide.'))
+    : (why==='gate' ? ('Tide '+S.tide+' needed '+(GATES[gi]?GATES[gi].need:0)
+        +' Shells earned, you had '+earned+'.')
+    : (why==='timeout' ? ('Needed '+GOAL+' Shells earned, you had '+earned+'.')
+    : ('The Tower flooded '+TOWER_HP+' times, lost on tide '+S.tide+' (water level '+S.water+').')));
   $('stars').innerHTML = survived
-    ? '<span title="Thắng càng sớm càng nhiều sao">'+'★'.repeat(stars)+'☆'.repeat(3-stars)+'</span>'
+    ? '<span title="Win earlier for more stars">'+'★'.repeat(stars)+'☆'.repeat(3-stars)+'</span>'
     : '';
   $('scorelist').innerHTML=
-    row('Vỏ Sò kiếm được',earned)+
-    row('Nhà còn sống × 10',houses+' → '+houses*10)+
-    row('Cối Nước đang chạy × 5',mills+' → '+mills*5)+
-    row('Triều đã đi qua × 20',tides+' → '+tides*20)+
-    row('Độ bền Tháp Mẫu × 15',S.towerHp+' → '+S.towerHp*15)+
-    row('Ô đất còn khô × 4',dry+' → '+dry*4)+
-    (survived?row('Thắng sớm, dư '+left+' triều × 25',left+' → '+early):'')+
-    '<div class="tot"><span>ĐIỂM</span><span>'+score+'</span></div>';
+    row('Shells earned',earned)+
+    row('Houses standing × 10',houses+' → '+houses*10)+
+    row('Mills running × 5',mills+' → '+mills*5)+
+    row('Tides survived × 20',tides+' → '+tides*20)+
+    row('Tower lives × 15',S.towerHp+' → '+S.towerHp*15)+
+    row('Dry tiles × 4',dry+' → '+dry*4)+
+    (survived?row('Early win, '+left+' tide(s) spare × 25',left+' → '+early):'')+
+    '<div class="tot"><span>SCORE</span><span>'+score+'</span></div>';
   if(score>S.best){ S.best=score; LS.set('tm_best',score);
-    $('bestline').textContent='🏆 Kỷ lục mới!'; }
-  else $('bestline').textContent='Kỷ lục: '+S.best;
+    $('bestline').textContent='🏆 New best!'; }
+  else $('bestline').textContent='Best: '+S.best;
   $('diary').innerHTML=diary(tides);
   drawEndMap();
   $('ovEnd').classList.add('on');
@@ -1996,17 +2188,17 @@ function diary(tides){
   const levees = G.filter(t=>t.b==='levee'||t.b==='gate').length;
   const deepest = G.reduce((a,t)=>Math.max(a, t.wet?S.water-t.h:0), 0);
   const L=[];
-  L.push('📖 <b>Nhật ký ván này</b> — đảo <b>'+ISLANDS[ISLE].n+'</b>');
-  L.push('· Đào <b>'+S.dug+'</b> nhát kênh, đắp/xây <b>'+S.built+'</b> lần.');
-  L.push('· Nước phá mất <b>'+S.lost+'</b> công trình; chỗ ngập sâu nhất <b>'+deepest+'</b> tầng.');
-  L.push('· Còn <b>'+levees+'</b> Đê/Cống đứng vững khi ván khép lại.');
-  if(best) L.push('· Triều được mùa nhất là <b>triều '+best.tide+'</b> — thu <b>'+best.gain+'</b> Vỏ Sò một lượt.');
+  L.push('📖 <b>This game</b> — <b>'+ISLANDS[ISLE].n+'</b>');
+  L.push('· Dug <b>'+S.dug+'</b> canal(s), raised/built <b>'+S.built+'</b> time(s).');
+  L.push('· The water destroyed <b>'+S.lost+'</b> building(s); deepest flood <b>'+deepest+'</b> level(s).');
+  L.push('· <b>'+levees+'</b> Dike(s)/Sluice(s) still standing at the end.');
+  if(best) L.push('· Best harvest: <b>tide '+best.tide+'</b> — <b>'+best.gain+'</b> Shells in one go.');
   L.push(S.over.survived
-    ? '· Gom đủ <b>'+Math.round(S.earned)+'</b> Vỏ Sò ở <b>triều '+S.tide+'</b>, nước mới <b>'+S.water+'</b>. Tháp Mẫu còn <b>'+S.towerHp+'/'+TOWER_HP+'</b> độ bền.'
+    ? '· Reached <b>'+Math.round(S.earned)+'</b> Shells on <b>tide '+S.tide+'</b>, water at <b>'+S.water+'</b>. Mother Tower lives <b>'+S.towerHp+'/'+TOWER_HP+'</b>.'
     : (S.over.why==='tower'
-      ? '· Tháp Mẫu đổ ở <b>triều '+S.tide+'</b>, lúc mực nước <b>'+S.water+'</b>.'
-      : '· Khép lại ở <b>triều '+S.tide+'</b> với <b>'+Math.round(S.earned)+'</b> Vỏ Sò kiếm được — thiếu <b>'
-        +Math.max(0,(S.over.why==='gate'?(GATES.find(g=>g.t===S.tide)||{need:0}).need:GOAL)-Math.round(S.earned))+'</b>.'));
+      ? '· The Mother Tower fell on <b>tide '+S.tide+'</b>, water level <b>'+S.water+'</b>.'
+      : '· Ended on <b>tide '+S.tide+'</b> with <b>'+Math.round(S.earned)+'</b> Shells earned — <b>'
+        +Math.max(0,(S.over.why==='gate'?(GATES.find(g=>g.t===S.tide)||{need:0}).need:GOAL)-Math.round(S.earned))+'</b> short.'));
   return L.join('<br>');
 }
 /* ---------- ket Van Tap: khong diem, khong nhat ky, chi mo ban day du ---------- */
@@ -2018,23 +2210,23 @@ function easyWin(){
           mills:G.filter(t=>t.b==='mill'&&t.wet).length, score:0};
   $('stars').innerHTML='';
   LS.set('tm_easy_done','1');
-  $('endTitle').textContent='Xong Ván Tập!';
-  $('endSub').textContent='Trụ hết '+EASY.TIDES+' con triều, gom được '+Math.round(S.earned)
-      +' Vỏ Sò. Giờ chị biết đủ 6 thứ: '
-      +'đắp cao, Nhà, đào kênh, Đê, cứu công trình sắp ngập, Cối Nước.';
+  $('endTitle').textContent='Practice Round complete!';
+  $('endSub').textContent='You lasted all '+EASY.TIDES+' tides and earned '+Math.round(S.earned)
+      +' Shells. Now you know all 6 basics: '
+      +'raising land, Houses, canals, Dikes, saving a flooding building, Water Mills.';
   $('scorelist').innerHTML='';
   $('bestline').textContent='';
-  $('diary').innerHTML='📖 <b>Bản đầy đủ khác gì?</b><br>'
-    +'· <b>Mục tiêu là SÒ</b>: gom đủ <b>'+GOAL+' Vỏ Sò kiếm được</b> là <b>thắng ngay</b>, '
-    +'thắng sớm thì nhiều sao hơn.<br>'
-    +'· Hết mỗi <b>Đại Triều</b> phải đạt mốc (<b>'+GATES.map(g=>g.need).join(' · ')
-    +'</b> sò ở triều <b>'+GATES.map(g=>g.t).join(' · ')+'</b>), thiếu là <b>thua</b>.<br>'
-    +'· Hết <b>'+TIDES+' triều</b> mà chưa đủ '+GOAL+' sò cũng thua. Nước lên cao nhất tới '
-    +'<b>mức '+maxLevel()+'</b>, mà đất đắp được tới <b>cao '+MAXH+'</b> — nên <b>đắp đất luôn cứu được</b>.<br>'
-    +'· Có <b>Chợ Vỏ Sò</b>: tiêu ở chợ <b>không trừ</b> sò đã kiếm.<br>'
-    +'· Tháp Mẫu <b>ngập 3 lần là thua</b> — nhưng tháp ở <b>cao 4</b> và nước dừng ở '
-    +'<b>mức '+maxLevel()+'</b>, nên nước không với tới tháp.';
-  $('againBtn').textContent='Chơi lại Ván Tập';
+  $('diary').innerHTML='📖 <b>What changes in the full game?</b><br>'
+    +'· <b>The goal is SHELLS</b>: earn <b>'+GOAL+' Shells</b> and you <b>win at once</b>; '
+    +'win earlier for more stars.<br>'
+    +'· After each <b>Spring Tide</b> you must hit a target (<b>'+GATES.map(g=>g.need).join(' · ')
+    +'</b> Shells by tide <b>'+GATES.map(g=>g.t).join(' · ')+'</b>), or <b>you lose</b>.<br>'
+    +'· Run out of <b>'+TIDES+' tides</b> before '+GOAL+' Shells and you lose too. The water tops out at '
+    +'<b>level '+maxLevel()+'</b> and land goes up to <b>height '+MAXH+'</b> — so <b>Raise Land can always save a tile</b>.<br>'
+    +'· There is a <b>Shell Market</b>: spending there <b>does not lower</b> Shells earned.<br>'
+    +'· The Mother Tower is <b>lost after 3 floods</b> — but it sits at <b>height 4</b> and the water stops at '
+    +'<b>level '+maxLevel()+'</b>, so it can\'t reach the tower.';
+  $('againBtn').textContent='Replay Practice Round';
   drawEndMap();
   $('ovEnd').classList.add('on');
   SFX.win(); syncHUD();
@@ -2076,34 +2268,34 @@ function drawEndMap(){
    MAN CHAO / BANG LUAT (bam ? mo lai luc nao cung duoc)
    ============================================================ */
 const INTRO_CARDS = [
-  ['building_house_dry',       'Nhà',      'Ra tiền khi <b>khô</b>. Dính nước là <b>mất</b>. Nhiều Nhà kề nhau càng nhiều tiền.'],
-  ['building_watermill_running','Cối Nước','Ra tiền khi <b>NGẬP</b> + có <b>Nhà khô ≤2 ô</b>. Thiếu Nhà thì <b>đứng im</b>.'],
-  ['building_gate_closed',     'Cống',     'Bấm để <b>mở/đóng</b>. Đóng = tường như Đê, mở = cho nước vào.'],
-  ['building_levee_full',      'Đê',       '<b>Nước không bao giờ qua</b>. Đại Triều ăn độ bền → phải Vá Đê.']
+  ['building_house_dry',       'House',    'Pays while <b>dry</b>. Gets wet = <b>lost</b>. Houses side by side earn more.'],
+  ['building_watermill_running','Water Mill','Pays when <b>FLOODED</b> + a <b>dry House ≤2 tiles</b> away. No House = <b>idle</b>.'],
+  ['building_gate_closed',     'Sluice',   'Tap to <b>open/close</b>. Closed = a wall like a Dike, open = lets water in.'],
+  ['building_levee_full',      'Dike',     '<b>Water never passes</b>. Spring Tides wear it down → Patch Dike.']
 ];
 /* Van Tap chi co 5 la, nen o minh hoa cung phai bo het chu cua ban day du
    (Dai Trieu, Va De) — nhac thu chua gap chi lam roi them. */
 const EASY_INTRO_CARDS = [
-  ['building_house_dry',        'Nhà',      'Ra tiền mỗi triều khi còn <b>khô</b>. Dính nước là <b>mất</b>.'],
-  ['building_watermill_running','Cối Nước', 'Ngược lại: <b>ngập mới ra tiền</b> — nhưng phải có <b>Nhà khô</b> gần (≤2 ô).'],
-  ['building_levee_full',       'Đê',       '<b>Nước không bao giờ qua.</b> Ô Đê cũng không bị ngập.']
+  ['building_house_dry',        'House',    'Pays every tide while <b>dry</b>. Gets wet = <b>lost</b>.'],
+  ['building_watermill_running','Water Mill','The opposite: <b>pays only when flooded</b> — but needs a <b>dry House</b> close by (≤2 tiles).'],
+  ['building_levee_full',       'Dike',     '<b>Water never passes.</b> A Dike tile never floods.']
 ];
 /* 3 cach cuu — dung dung 3 icon gen o luot 31/10 05:30 (art/assets.json §5.9).
    Thu tu theo do de lam: dap len chinh no → chan bang De → bit o ke tren duong nuoc. */
 const RESCUE_CARDS = [
-  ['card_icon_rescue_raise','① Đắp lên chính nó',
-   '<b>Đắp Đất</b> vào đúng ô đó. Cao hơn mực nước là <b>khô lại</b>, công trình giữ nguyên.'],
-  ['card_icon_rescue_levee','② Đê chắn đường',
-   '<b>Đê</b> (hay <b>Cống đóng</b>) vào ô nước đang luồn vào. <b>Nước không bao giờ qua Đê.</b>'],
-  ['card_icon_rescue_block','③ Bịt ô kề',
-   '<b>Đắp Đất</b> ô kề <b>thấp</b> hơn — chặn luôn đường nước, cả vùng sau đó khô.']
+  ['card_icon_rescue_raise','① Raise the tile',
+   '<b>Raise Land</b> on that very tile. Above the water it <b>stays dry</b>, the building stays.'],
+  ['card_icon_rescue_levee','② Block with a Dike',
+   'A <b>Dike</b> (or <b>closed Sluice</b>) where the water flows in. <b>Water never passes a Dike.</b>'],
+  ['card_icon_rescue_block','③ Plug the neighbour',
+   '<b>Raise Land</b> on the <b>lower</b> neighbour — it cuts the water path, the area behind stays dry.']
 ];
 /* Van Tap chi co 5 la nen bo cach ③ (can hieu duong nuoc) va chu "Cong". */
 const RESCUE_CARDS_EASY = [
-  ['card_icon_rescue_raise','① Đắp lên chính nó',
-   '<b>Đắp Đất</b> vào đúng ô đó. Cao hơn mực nước là <b>khô lại</b>.'],
-  ['card_icon_rescue_levee','② Đê chắn đường',
-   '<b>Đê</b> vào ô nước đang luồn vào. <b>Nước không bao giờ qua Đê.</b>']
+  ['card_icon_rescue_raise','① Raise the tile',
+   '<b>Raise Land</b> on that very tile. Above the water it <b>stays dry</b>.'],
+  ['card_icon_rescue_levee','② Block with a Dike',
+   'A <b>Dike</b> where the water flows in. <b>Water never passes a Dike.</b>']
 ];
 function buildRescueCards(easy){
   $('rescueCards').innerHTML = (easy?RESCUE_CARDS_EASY:RESCUE_CARDS).map(a=>
@@ -2114,13 +2306,13 @@ function buildRescueCards(easy){
      gio sai, bo di. Van giu mot cau nhac: nuoc dung o dau, dat cao toi dau. */
   const t1=TIDE_LEVEL.findIndex(v=>v>MAXH)+1;   // 0 = khong bao gio vuot
   $('rescueNote').innerHTML = easy
-    ? '💡 Trong Ván Tập nước chỉ lên tới mức 3, nên <b>đắp đất luôn cứu được</b>.'
+    ? '💡 In Practice the water only reaches level 3, so <b>Raise Land always works</b>.'
     : (t1>0
-      ? '⚠ Đất chỉ đắp tới <b>cao '+MAXH+'</b>, mà nước lên tới <b>'
-        +TIDE_LEVEL[TIDE_LEVEL.length-1]+'</b>. Từ <b>triều '+t1+'</b> trở đi nước đã cao hơn mọi ô đất, '
-        +'nên cách ① và ③ hết tác dụng — chỉ còn <b>Đê / Cống đóng</b> cứu được.'
-      : '💡 Nước dừng ở <b>mức '+maxLevel()+'</b>, đất đắp tới <b>cao '+MAXH+'</b> — '
-        +'nên <b>cả 3 cách dùng được tới hết ván</b>.');
+      ? '⚠ Land only goes up to <b>height '+MAXH+'</b>, but the water reaches <b>'
+        +TIDE_LEVEL[TIDE_LEVEL.length-1]+'</b>. From <b>tide '+t1+'</b> on the water is above all land, '
+        +'so ① and ③ stop working — only <b>Dikes / closed Sluices</b> can save tiles.'
+      : '💡 The water stops at <b>level '+maxLevel()+'</b> and land goes up to <b>height '+MAXH+'</b> — '
+        +'so <b>all 3 ways work until the end</b>.');
 }
 let introMode='boot';
 function buildIntroCards(easy){
@@ -2134,47 +2326,47 @@ function openIntro(mode){
   introMode=mode;
   if(isEasy()){
     buildIntroCards(true); buildRescueCards(true);
-    $('introH2').textContent='Ván Tập - tập cho quen tay';
-    $('introSub').textContent='Ngắn thôi: '+EASY.TIDES+' con triều. Ván này không thua được.';
+    $('introH2').textContent='Practice Round';
+    $('introSub').textContent='Short: '+EASY.TIDES+' tides. You can\'t lose this one.';
     $('introGoal').innerHTML =
-        '<div>🎓 <b>Mỗi triều học đúng 1 thứ.</b> Cứ bấm theo <b>mũi vàng</b>, không cần đọc gì.</div>'
-      + '<div>🛡 <b>Không thua được.</b> Tháp Mẫu (ô hồng giữa đảo) ở trên cao, nước không với tới.</div>'
-      + '<div>🌊 Trụ hết <b>'+EASY.TIDES+' triều</b> là xong - rồi mới vào bản đầy đủ.</div>'
-      + '<div>🐚 Để ý <b>thanh Sò kiếm được</b> trên đầu: ở <b>bản đầy đủ</b> gom đủ <b>'+GOAL
-      + ' sò</b> là <b>thắng</b>, thiếu sò ở <b>mốc</b> là thua. Ván Tập chỉ tập nhìn thanh đó.</div>';
-    $('introFlow').innerHTML='Một triều đi như vầy:<br>'
-      +'1. <b>Chọn lá</b> → <b>bấm ô nháy vàng</b>. Bấm sai thì <b>↶ Hoàn tác</b> lùi 1 bước.<br>'
-      +'2. Bấm <b>TRIỀU LÊN ▲</b>.<br>'
-      +'3. Nước dâng. <b>Nhà khô</b> ra tiền, <b>Cối ngập</b> ra tiền.';
-    $('introStart').textContent = mode==='boot' ? 'BẮT ĐẦU VÁN TẬP ▶' : 'CHƠI LẠI VÁN TẬP TỪ ĐẦU';
-    $('introSkip').textContent  = mode==='boot' ? 'Bỏ hướng dẫn, tự mò' : 'Đóng, chơi tiếp';
+        '<div>🎓 <b>Learn exactly 1 thing per tide.</b> Just follow the <b>yellow arrow</b>, no reading needed.</div>'
+      + '<div>🛡 <b>You can\'t lose.</b> The Mother Tower (pink tile in the middle) sits high, the water can\'t reach it.</div>'
+      + '<div>🌊 Last <b>'+EASY.TIDES+' tides</b> and you are done - then the full game.</div>'
+      + '<div>🐚 Watch the <b>Shells earned bar</b> at the top: in the <b>full game</b> earning <b>'+GOAL
+      + ' Shells</b> means <b>you win</b>, falling short at a <b>target</b> means you lose.</div>';
+    $('introFlow').innerHTML='One tide goes like this:<br>'
+      +'1. <b>Pick a card</b> → <b>tap the flashing tile</b>. Wrong tap? <b>↶ Undo</b> goes back 1 step.<br>'
+      +'2. Tap <b>TIDE UP ▲</b>.<br>'
+      +'3. The water rises. <b>Dry Houses</b> pay, <b>flooded Mills</b> pay.';
+    $('introStart').textContent = mode==='boot' ? 'START PRACTICE ▶' : 'RESTART PRACTICE';
+    $('introSkip').textContent  = mode==='boot' ? 'Skip the guide' : 'Close, keep playing';
     $('ovIntro').classList.add('on');
     return;
   }
   buildIntroCards(); buildRescueCards(false);
-  $('introH2').textContent='Tide Mason - Thợ Đắp Triều';
+  $('introH2').textContent='Tide Mason';
   /* Cau "duong bo" la cau quan trong nhat cua luat moi (02/11) -> day len lam
      phu de thay cho cau cu (cau cu chi lap lai dong 🎯 ngay duoi). */
-  $('introSub').innerHTML='Cả ván là giữ một <b>ĐƯỜNG BỜ</b>: <b>Nhà</b> ở chỗ khô — '
-    + '<b>Cối</b> ở ô ngập cách Nhà <b>≤'+MILL_REACH+' ô</b>. Ngập hết thì Cối đứng im hết.';
+  $('introSub').innerHTML='The whole game is holding a <b>SHORELINE</b>: <b>Houses</b> on dry land — '
+    + '<b>Mills</b> on flooded tiles <b>≤'+MILL_REACH+' tiles</b> from a House. Flood everything and every Mill stops.';
   $('introGoal').innerHTML =
-      '<div>🎯 <b>THẮNG - gom đủ '+GOAL+' Vỏ Sò.</b> Đủ là <b>thắng ngay</b>, càng sớm '
-    + 'càng nhiều <b>sao</b>. Tính <b>tổng kiếm được</b>, tiêu ở Chợ <b>không trừ</b>.</div>'
-    + '<div>🚩 <b>THUA</b> - thiếu sò ở <b>mốc</b>: '
-    + GATES.map(g=>'<b>'+g.need+'</b> sò hết triều <b>'+g.t+'</b>').join(' · ')
-    + '. Hoặc hết <b>'+TIDES+' triều</b> chưa đủ '+GOAL+'.</div>'
-    + '<div>💀 <b>Tháp Mẫu</b> (ô hồng giữa đảo) ngập <b>'+TOWER_HP+' lần</b> là thua - nhưng nước '
-    + '<b>không với tới</b> tháp.</div>'
-    + '<div>🌊 Nước cao nhất <b>mức '+maxLevel()+'</b>, đất đắp tới <b>cao '+MAXH+'</b> - ô nào cũng '
-    + 'giữ khô được. <b>Đại Triều '+BIGTIDE.join(' · ')+'</b> ăn độ bền Đê.</div>'
+      '<div>🎯 <b>WIN - earn '+GOAL+' Shells.</b> Reach it and you <b>win at once</b>; earlier '
+    + 'means more <b>stars</b>. It counts <b>total earned</b> — spending at the Market <b>doesn\'t lower it</b>.</div>'
+    + '<div>🚩 <b>LOSE</b> - short of Shells at a <b>target</b>: '
+    + GATES.map(g=>'<b>'+g.need+'</b> by tide <b>'+g.t+'</b>').join(' · ')
+    + '. Or all <b>'+TIDES+' tides</b> gone before '+GOAL+'.</div>'
+    + '<div>💀 The <b>Mother Tower</b> (pink tile in the middle) lost after <b>'+TOWER_HP+' floods</b> - but the water '
+    + '<b>can\'t reach</b> it.</div>'
+    + '<div>🌊 The water tops out at <b>level '+maxLevel()+'</b>, land goes up to <b>height '+MAXH+'</b> - any tile '
+    + 'can be kept dry. <b>Spring Tides '+BIGTIDE.join(' · ')+'</b> wear down Dikes.</div>'
     ;
-  $('introFlow').innerHTML='Một triều đi như vầy:<br>'
-    +'1. <b>Đặt lá</b>: chọn lá → bấm ô vàng. Sai: <b>↶ Hoàn tác</b>.<br>'
-    +'2. Bấm <b>TRIỀU LÊN ▲</b>.<br>'
-    +'3. Nước dâng: <b>Nhà ngập là mất</b>; <b>Cối ngập ra tiền</b> nếu có <b>Nhà khô ≤2 ô</b>.<br>'
-    +'4. Thu <b>Vỏ Sò</b> → cộng vào thanh 🐚 → ra <b>Chợ</b> mua lá mới → triều kế tiếp.';
-  $('introStart').textContent = mode==='boot' ? 'CHƠI CÓ HƯỚNG DẪN ▶' : 'CHƠI LẠI TỪ ĐẦU, CÓ HƯỚNG DẪN';
-  $('introSkip').textContent  = mode==='boot' ? 'Vào chơi luôn' : 'Đóng, chơi tiếp';
+  $('introFlow').innerHTML='One tide goes like this:<br>'
+    +'1. <b>Place cards</b>: pick a card → tap a yellow tile. Mistake? <b>↶ Undo</b>.<br>'
+    +'2. Tap <b>TIDE UP ▲</b>.<br>'
+    +'3. The water rises: <b>a flooded House is lost</b>; <b>a flooded Mill pays</b> if a <b>dry House is ≤2 tiles</b> away.<br>'
+    +'4. Collect <b>Shells</b> → they fill the 🐚 bar → visit the <b>Market</b> for new cards → next tide.';
+  $('introStart').textContent = mode==='boot' ? 'PLAY WITH GUIDE ▶' : 'RESTART WITH GUIDE';
+  $('introSkip').textContent  = mode==='boot' ? 'Just play' : 'Close, keep playing';
   $('ovIntro').classList.add('on');
 }
 $('helpbtn').onclick=()=>openIntro('help');
@@ -2307,7 +2499,7 @@ loadImgs(()=>{
   if(wantEasy){ easyLesson(1); if(EASY_TUT) openIntro('boot'); }
   window.TM.ready=true;
   const miss=[...new Set(NEED)].filter(n=>!hasImg(n));
-  if(miss.length) console.warn('Thiếu asset:',miss);
+  if(miss.length) console.warn('Missing asset:',miss);
 });
 </script>
 </body>
